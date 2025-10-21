@@ -1,0 +1,28 @@
+name: 🚀 Deploy Loan Central Plugin to apps.bizmate360.com
+
+on:
+  push:
+    branches:
+      - main   # Deploy automatically when pushing to main
+
+jobs:
+  ftp-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🧾 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 📤 Upload plugin via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ${{ secrets.SG_FTP_SERVER }}
+          username: ${{ secrets.SG_FTP_USER }}
+          password: ${{ secrets.SG_FTP_PASS }}
+          # 👇 Path to your plugin inside the apps subdomain
+          server-dir: apps.bizmate360.com/wp-content/plugins/loan-central/
+          local-dir: ./
+          exclude: |
+            **/.git*
+            **/.github*
+            **/node_modules/**
+            **/README.md

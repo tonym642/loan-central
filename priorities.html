@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Priorities - Loan Central</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    body { font-family: 'Poppins', sans-serif; background: #f8f9fa; margin: 0; }
+    .priorities-grid { display: flex; gap: 2rem; flex-wrap: wrap; }
+    .priorities-panel {
+      background: #fff;
+      border-radius: 6px;
+      border: 1px solid #e5e7eb !important;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+      flex: 1 1 400px;
+      min-width: 340px;
+      max-width: 600px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+    }
+    .priorities-title { font-size: 1.1rem; font-weight: 600; color: #28a745; margin-bottom: 1rem; }
+    .priorities-table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+    .priorities-table th, .priorities-table td { padding: 10px 12px; border-bottom: 1px solid #e5e7eb; background: #fff; }
+    .priorities-table th { position: sticky; top: 0; background: #e8f5e8; color: #28a745; font-weight: 600; z-index: 2; }
+  .priorities-table tbody { display: table-row-group; max-height: unset; overflow: visible; }
+  /* Natural table layout for alignment */
+    .star { cursor: pointer; font-size: 1.1rem; color: #6c757d; transition: color 0.2s; }
+    .star.priority { color: #28a745; }
+    .priorities-table .form-check-input { accent-color: #28a745; }
+    .scroll-panel { overflow-y: auto; max-height: 420px; }
+    @media (max-width: 900px) { .priorities-grid { flex-direction: column; } }
+  </style>
+</head>
+<body>
+  <div class="row g-4">
+    <div class="col-12 col-md-6">
+      <div class="priorities-panel h-100">
+  <div class="priorities-title d-flex align-items-center">Conditions</div>
+        <div class="scroll-panel">
+          <table class="priorities-table" id="conditionsTable">
+            <colgroup>
+              <col style="width:40px">
+              <col style="width:40px">
+              <col>
+              <col>
+            </colgroup>
+            <thead>
+              <tr>
+                <th style="width:40px;"></th>
+                <th style="width:40px;"></th>
+                <th>Customer</th>
+                <th>Condition</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-md-6">
+      <div class="priorities-panel h-100">
+  <div class="priorities-title d-flex align-items-center">Tasks</div>
+        <div class="scroll-panel">
+          <table class="priorities-table" id="tasksTable">
+            <colgroup>
+              <col style="width:40px">
+              <col style="width:40px">
+              <col>
+              <col>
+            </colgroup>
+            <thead>
+              <tr>
+                <th style="width:40px;"></th>
+                <th style="width:40px;"></th>
+                <th>Customer</th>
+                <th>Task</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    // Load priorities from localStorage (replace 'Favorites' with 'Priorities')
+    function getAllPriorities(type) {
+      let priorities = [];
+      for (let key in localStorage) {
+        if (key.startsWith('loanCentral_') && key.endsWith('_' + type)) {
+          let data = JSON.parse(localStorage.getItem(key) || '{}');
+          for (let k in data) {
+            let item = data[k];
+            if (item.priority === 'Yes') {
+              priorities.push({
+                customer: key.split('_')[1],
+                ...item,
+                id: k,
+                storageKey: key
+              });
+            }
+          }
+        }
+      }
+      return priorities;
+    }
+    function renderConditions() {
+      const tbody = document.querySelector('#conditionsTable tbody');
+      tbody.innerHTML = '';
+      let priorities = getAllPriorities('conditions');
+      priorities.forEach(item => {
+        let tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><input type="checkbox" class="form-check-input" ${item.status==='completed'?'checked':''} onchange="toggleConditionCleared('${item.storageKey}','${item.id}',this)"></td>
+          <td><i class="bi bi-star-fill star priority" onclick="togglePriority('conditions','${item.storageKey}','${item.id}',this)"></i></td>
+          <td>${item.customer}</td>
+          <td>${item.description || item.id.replace('_',' ')}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+    function renderTasks() {
+      const tbody = document.querySelector('#tasksTable tbody');
+      tbody.innerHTML = '';
+      let priorities = getAllPriorities('tasks');
+      priorities.forEach(item => {
+        let tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><input type="checkbox" class="form-check-input" ${item.status==='completed'?'checked':''} onchange="toggleTaskCleared('${item.storageKey}','${item.id}',this)"></td>
+          <td><i class="bi bi-star-fill star priority" onclick="togglePriority('tasks','${item.storageKey}','${item.id}',this)"></i></td>
+          <td>${item.customer}</td>
+          <td>${item.description || item.id.replace('_',' ')}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+    function togglePriority(type, storageKey, id, el) {
+      let data = JSON.parse(localStorage.getItem(storageKey) || '{}');
+      if (data[id].priority === 'Yes') {
+        data[id].priority = 'No';
+        el.classList.remove('priority');
+        el.classList.remove('bi-star-fill');
+        el.classList.add('bi-star');
+      } else {
+        data[id].priority = 'Yes';
+        el.classList.add('priority');
+        el.classList.remove('bi-star');
+        el.classList.add('bi-star-fill');
+      }
+      localStorage.setItem(storageKey, JSON.stringify(data));
+      setTimeout(() => {
+        if (type === 'conditions') renderConditions();
+        else renderTasks();
+      }, 100);
+    }
+    function toggleConditionCleared(storageKey, id, el) {
+      let data = JSON.parse(localStorage.getItem(storageKey) || '{}');
+      data[id].status = el.checked ? 'completed' : 'pending';
+      localStorage.setItem(storageKey, JSON.stringify(data));
+      // Keep displayed
+    }
+    function toggleTaskCleared(storageKey, id, el) {
+      let data = JSON.parse(localStorage.getItem(storageKey) || '{}');
+      data[id].status = el.checked ? 'completed' : 'pending';
+      localStorage.setItem(storageKey, JSON.stringify(data));
+      // Keep displayed
+    }
+    renderConditions();
+    renderTasks();
+  </script>
+</body>
+</html>

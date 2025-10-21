@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AIUS – AI Underwriting System</title>
+  <style>
+    :root {
+      --glass-bg: rgba(255, 255, 255, 0.08);
+      --border-color: rgba(255, 255, 255, 0.15);
+      --accent: #00c6ff;
+      --text: #e4e4e4;
+      --text-dim: #a0a0a0;
+      --radius: 14px;
+      --blur: 16px;
+      --sidebar-width: 260px;
+      --bg: radial-gradient(circle at 20% 20%, #0b0b0f, #141418 80%);
+    }
+
+    [data-theme="light"] {
+      --glass-bg: rgba(255, 255, 255, 0.6);
+      --border-color: rgba(0, 0, 0, 0.1);
+      --accent: #007bff;
+      --text: #111;
+      --text-dim: #444;
+      --bg: linear-gradient(180deg, #f4f6fa, #dfe3eb);
+    }
+
+    body {
+      margin: 0;
+      font-family: "Inter", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+      transition: background 0.4s, color 0.4s;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: var(--sidebar-width);
+      backdrop-filter: blur(var(--blur));
+      background: var(--glass-bg);
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      padding: 1rem;
+    }
+
+    .sidebar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .sidebar-header h2 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin: 0;
+      color: var(--accent);
+    }
+
+    #newChat, #toggleMode {
+      background: var(--accent);
+      border: none;
+      color: #000;
+      border-radius: var(--radius);
+      padding: 0.3rem 0.7rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-left: 0.3rem;
+    }
+
+    .chat-history {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .chat-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: transparent;
+      border-radius: var(--radius);
+      padding: 0.5rem 0.7rem;
+      margin-bottom: 0.3rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .chat-item:hover, .chat-item.active {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .chat-item span {
+      flex: 1;
+      font-size: 0.9rem;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .chat-item .actions button {
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      cursor: pointer;
+      margin-left: 0.3rem;
+    }
+
+    /* Main */
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .modules-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+      padding: 1rem;
+      flex-shrink: 0;
+    }
+
+    .module-card {
+      backdrop-filter: blur(var(--blur));
+      background: var(--glass-bg);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      text-align: center;
+      padding: 1.2rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      user-select: none;
+    }
+
+    .module-card:hover,
+    .module-card.active {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: var(--accent);
+      color: var(--accent);
+      transform: translateY(-3px);
+    }
+
+    /* Chat */
+    .chat-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      backdrop-filter: blur(var(--blur));
+      background: rgba(255, 255, 255, 0.04);
+      border-top: 1px solid var(--border-color);
+      border-radius: var(--radius) var(--radius) 0 0;
+      margin: 0 1rem 1rem 1rem;
+      overflow: hidden;
+    }
+
+    .messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .message {
+      padding: 0.7rem 1rem;
+      border-radius: var(--radius);
+      max-width: 80%;
+      line-height: 1.4;
+      word-wrap: break-word;
+    }
+
+    .message.ai {
+      align-self: flex-start;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .message.user {
+      align-self: flex-end;
+      background: var(--accent);
+      color: #000;
+    }
+
+    .chat-input {
+      display: flex;
+      align-items: center;
+      padding: 0.6rem 1rem;
+      border-top: 1px solid var(--border-color);
+      background: rgba(0, 0, 0, 0.3);
+    }
+
+    .chat-input input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--text);
+      font-size: 1rem;
+      outline: none;
+      padding: 0.5rem;
+    }
+
+    .chat-input button {
+      background: var(--accent);
+      border: none;
+      color: #000;
+      font-weight: 600;
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    .chat-input button:hover {
+      opacity: 0.8;
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 3px;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        display: none;
+      }
+      .modules-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body data-theme="dark">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h2>AIUS</h2>
+      <div>
+        <button id="toggleMode">☀️</button>
+        <button id="newChat">+ New</button>
+      </div>
+    </div>
+    <ul class="chat-history" id="chatList"></ul>
+  </aside>
+
+  <main class="main-content">
+    <section class="modules-grid" id="modules">
+      <div class="module-card" data-module="UW Desk">🏢 UW Desk</div>
+      <div class="module-card" data-module="Side by Side">⚖️ Side by Side</div>
+      <div class="module-card" data-module="ICW W2">💼 ICW W2</div>
+      <div class="module-card" data-module="ICW S-E">📊 ICW S-E</div>
+      <div class="module-card" data-module="ICW Other">🧾 ICW Other</div>
+    </section>
+
+    <section class="chat-area">
+      <div class="messages" id="messages">
+        <div class="message ai">👋 Welcome to AIUS. Select a module to begin.</div>
+      </div>
+      <div class="chat-input">
+        <input id="chatInput" type="text" placeholder="Type your question..." />
+        <button id="sendBtn">➤</button>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // === ELEMENTS ===
+    const chatInput = document.getElementById("chatInput");
+    const sendBtn = document.getElementById("sendBtn");
+    const messages = document.getElementById("messages");
+    const modules = document.querySelectorAll(".module-card");
+    const chatList = document.getElementById("chatList");
+    const newChatBtn = document.getElementById("newChat");
+    const toggleMode = document.getElementById("toggleMode");
+
+    let activeModule = null;
+    let chatHistory = JSON.parse(localStorage.getItem("aiusChats") || "[]");
+    let currentChat = { id: Date.now(), title: "New Chat", module: null, messages: [] };
+
+    // === INITIAL RENDER ===
+    renderChatList();
+
+    // === EVENT HANDLERS ===
+    modules.forEach((m) => {
+      m.addEventListener("click", () => {
+        modules.forEach(x => x.classList.remove("active"));
+        m.classList.add("active");
+        activeModule = m.dataset.module;
+        addMessage("ai", `Module "${activeModule}" activated.`);
+      });
+    });
+
+    sendBtn.addEventListener("click", handleSend);
+    chatInput.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") handleSend();
+    });
+
+    newChatBtn.addEventListener("click", () => {
+      saveCurrentChat();
+      currentChat = { id: Date.now(), title: "New Chat", module: null, messages: [] };
+      messages.innerHTML = `<div class="message ai">🧠 New conversation started.</div>`;
+      modules.forEach(x => x.classList.remove("active"));
+      renderChatList();
+    });
+
+    toggleMode.addEventListener("click", () => {
+      const theme = document.body.dataset.theme === "dark" ? "light" : "dark";
+      document.body.dataset.theme = theme;
+      toggleMode.textContent = theme === "dark" ? "☀️" : "🌙";
+    });
+
+    // === FUNCTIONS ===
+    function handleSend() {
+      const text = chatInput.value.trim();
+      if (!text) return;
+      addMessage("user", text);
+      chatInput.value = "";
+
+      setTimeout(() => {
+        addMessage("ai", `AIUS (${activeModule || "General"}): Received your message.`);
+      }, 600);
+    }
+
+    function addMessage(role, text) {
+      const div = document.createElement("div");
+      div.className = `message ${role}`;
+      div.textContent = text;
+      messages.appendChild(div);
+      messages.scrollTop = messages.scrollHeight;
+
+      currentChat.messages.push({ role, text, time: new Date().toISOString() });
+      saveCurrentChat();
+    }
+
+    function renderChatList() {
+      chatList.innerHTML = "";
+      chatHistory.forEach((chat) => {
+        const li = document.createElement("li");
+        li.className = "chat-item";
+        li.innerHTML = `<span>${chat.title}</span>
+          <div class="actions">
+            <button onclick="loadChat(${chat.id})">🔁</button>
+            <button onclick="deleteChat(${chat.id})">🗑️</button>
+          </div>`;
+        chatList.appendChild(li);
+      });
+    }
+
+    function saveCurrentChat() {
+      const index = chatHistory.findIndex((c) => c.id === currentChat.id);
+      if (index >= 0) chatHistory[index] = currentChat;
+      else chatHistory.push(currentChat);
+      localStorage.setItem("aiusChats", JSON.stringify(chatHistory));
+      renderChatList();
+    }
+
+    window.loadChat = (id) => {
+      const chat = chatHistory.find((c) => c.id === id);
+      if (!chat) return;
+      currentChat = chat;
+      messages.innerHTML = "";
+      chat.messages.forEach((m) => addMessage(m.role, m.text));
+    };
+
+    window.deleteChat = (id) => {
+      chatHistory = chatHistory.filter((c) => c.id !== id);
+      localStorage.setItem("aiusChats", JSON.stringify(chatHistory));
+      renderChatList();
+    };
+  </script>
+</body>
+</html>

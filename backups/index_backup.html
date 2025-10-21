@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Loan Central - Customer File v8</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet" />
+
+<style>
+body{font-family:'Poppins',sans-serif;background:#f8f9fa;margin:0;overflow-x:hidden;}
+/* HEADER */
+.header-bar{background:#fff;border-bottom:1px solid #e0e0e0;box-shadow:0 1px 3px rgba(0,0,0,.05);
+position:sticky;top:0;z-index:100;padding:.5rem 1rem;}
+.customer-name{font-weight:600;font-size:1.1rem;color:#333;margin-bottom:.3rem;}
+.header-actions{display:flex;justify-content:flex-end;align-items:center;gap:.75rem;}
+.btn-save{background:#28a745;border:none;color:#fff;font-weight:500;border-radius:6px;padding:6px 16px;
+font-size:.9rem;display:flex;align-items:center;gap:6px;cursor:pointer;}
+.btn-save:hover{background:#218838;}
+.icon-btn{color:#555;font-size:1.4rem;cursor:pointer;transition:color .2s;}
+.icon-btn:hover{color:#28a745;}
+/* SUBNAV */
+.subnav{background:#fff;border-bottom:1px solid #e0e0e0;display:flex;gap:1.5rem;padding:.75rem 1.25rem;
+position:sticky;top:84px;z-index:90;overflow-x:auto;}
+.subnav a{text-decoration:none;font-weight:500;color:#555;position:relative;white-space:nowrap;}
+.subnav a.active{color:#28a745;}
+.subnav a.active::after{content:"";position:absolute;left:0;bottom:-6px;width:100%;height:2px;background:#28a745;border-radius:2px;}
+/* LAYOUT */
+.content{padding:1.5rem;}
+.card{border:1px solid #e9ecef;border-radius:12px;box-shadow:0 2px 6px rgba(0,0,0,.05);}
+.split2{display:grid;grid-template-columns:360px 1fr;gap:1.5rem;}
+.split3{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1.5rem;}
+.split-conditions{display:grid;grid-template-columns:360px 1fr;gap:1.5rem;}
+.conditions-table{width:100%;border-collapse:collapse;margin-top:0.5rem;table-layout:auto;}
+.conditions-table th{background:#f8f9fa;border:1px solid #dee2e6;padding:8px 12px;font-weight:600;font-size:0.85rem;color:#495057;white-space:nowrap;}
+.conditions-table td{border:1px solid #dee2e6;padding:8px 12px;font-size:0.9rem;vertical-align:middle;}
+.conditions-table th:nth-child(1), .conditions-table td:nth-child(1){width:70px;}
+.conditions-table th:nth-child(2), .conditions-table td:nth-child(2){width:50px;}
+.conditions-table th:nth-child(3), .conditions-table td:nth-child(3){width:60px;}
+.conditions-table th:nth-child(4), .conditions-table td:nth-child(4){width:auto;}
+.conditions-table th:nth-child(5), .conditions-table td:nth-child(5){width:80px;}
+.conditions-table th:nth-child(6), .conditions-table td:nth-child(6){width:70px;}
+.edit-btn{width:16px;height:16px;cursor:pointer;opacity:0.7;transition:opacity 0.2s;}
+.edit-btn:hover{opacity:1;}
+.condition-edit-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.45);
+display:none;z-index:200;opacity:0;transition:opacity .3s ease;}
+.condition-edit-overlay.show{display:block;opacity:1;}
+.condition-edit-panel{position:fixed;top:0;right:-400px;width:380px;height:100%;background:#fff;
+box-shadow:-4px 0 10px rgba(0,0,0,.25);display:flex;flex-direction:column;
+border-top-left-radius:12px;border-bottom-left-radius:12px;transition:right .35s ease;z-index:201;
+padding:1rem;overflow-y:auto;}
+.condition-edit-panel.show{right:0;}
+.filter,.checklist{background:#fff;border:1px solid #e9ecef;border-radius:10px;padding:1rem;box-shadow:0 1px 3px rgba(0,0,0,.05);}
+.checklist-section{margin-bottom:1.5rem;}
+.checklist-section h6{font-weight:600;font-size:.95rem;margin-bottom:.5rem;color:#28a745;}
+.task-item{display:flex;align-items:center;gap:.6rem;margin-bottom:.35rem;}
+.task-item input[type=checkbox]{width:18px;height:18px;cursor:pointer;accent-color:#28a745;}
+.task-item label{font-size:.9rem;color:#333;cursor:pointer;}
+.btn-outline-success.active{background:#28a745;color:#fff;border-color:#28a745;}
+/* FINANCIALS */
+.fin-cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1.5rem;}
+.fin-box{background:#fff;border:1px solid #e9ecef;border-radius:10px;padding:1rem;box-shadow:0 1px 3px rgba(0,0,0,.05);}
+.fin-box h6{font-weight:600;font-size:.95rem;color:#28a745;margin-bottom:.75rem;}
+.fin-box input{width:100%;border:1px solid #ddd;border-radius:6px;padding:.45rem .65rem;margin-bottom:.5rem;font-size:.9rem;}
+/* NOTES */
+.notes-wrap{display:grid;grid-template-columns:360px 1fr;gap:1.5rem;}
+.note-list,.note-view{background:#fff;border:1px solid #e9ecef;border-radius:10px;padding:1rem;box-shadow:0 1px 3px rgba(0,0,0,.05);}
+.note-item{padding:.5rem;border-bottom:1px solid #eee;cursor:pointer;}
+.note-item:hover{background:#f8f9fa;}
+.note-item.active{background:#e9f7ef;}
+.note-view textarea{width:100%;height:300px;border:1px solid #ddd;border-radius:8px;padding:.75rem;font-size:.9rem;}
+/* AIUS PANEL */
+.aius-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.45);
+display:none;z-index:200;opacity:0;transition:opacity .3s ease;}
+.aius-overlay.show{display:block;opacity:1;}
+.aius-panel{position:fixed;top:0;right:-400px;width:380px;height:100%;background:#fff;
+box-shadow:-4px 0 10px rgba(0,0,0,.25);display:flex;flex-direction:column;
+border-top-left-radius:12px;border-bottom-left-radius:12px;transition:right .35s ease;z-index:201;}
+.aius-panel.active{right:0;}
+.aius-header{position:fixed;top:0;width:380px;display:flex;justify-content:space-between;align-items:center;
+padding:1rem;border-bottom:1px solid #e0e0e0;background:#28a745;color:#fff;border-top-left-radius:12px;
+z-index:202;box-shadow:0 2px 4px rgba(0,0,0,0.1);}
+.aius-chat{flex:1;margin-top:60px;margin-bottom:70px;padding:1rem;overflow-y:auto;}
+.chat-message{margin-bottom:1rem;display:flex;}
+.chat-message.user{justify-content:flex-end;}
+.chat-bubble{max-width:80%;padding:.6rem .9rem;border-radius:12px;font-size:.9rem;line-height:1.4;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.05);}
+.aius-input{position:fixed;bottom:0;width:380px;padding:.5rem;border-top:1px solid #e0e0e0;
+display:flex;align-items:center;gap:.4rem;background:#fff;box-shadow:0 -2px 5px rgba(0,0,0,0.08);z-index:202;}
+.icon-circle{width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:50%;
+background:#f1f3f5;color:#555;cursor:pointer;transition:background .2s;}
+.icon-circle:hover{background:#e9ecef;}
+.aius-input input{flex:1;border:1px solid #ddd;border-radius:30px;padding:.4rem .8rem;font-size:.9rem;outline:none;}
+.btn-send{width:36px;height:36px;border:none;border-radius:50%;background:#28a745;color:#fff;
+display:flex;align-items:center;justify-content:center;font-size:1.1rem;cursor:pointer;}
+.btn-send:hover{background:#218838;}
+.condition-edit-panel h6{color:#28a745;margin-bottom:1rem;font-weight:600;}
+.condition-edit-panel .form-group{margin-bottom:1rem;}
+.condition-edit-panel label{font-weight:500;font-size:0.9rem;color:#555;margin-bottom:0.25rem;display:block;}
+.condition-edit-panel input, .condition-edit-panel select, .condition-edit-panel textarea{width:100%;border:1px solid #ddd;border-radius:6px;padding:0.5rem;font-size:0.9rem;}
+.condition-edit-panel textarea{height:80px;resize:vertical;}
+.condition-edit-buttons{display:flex;gap:0.5rem;margin-top:1rem;}
+.condition-edit-buttons .btn{font-size:0.85rem;padding:0.4rem 0.8rem;}
+@media(max-width:768px){
+.split2,.notes-wrap,.split-conditions{grid-template-columns:1fr;}
+.condition-edit-panel{width:100%;right:-100%;}
+.condition-edit-panel.show{right:0;}
+.aius-panel{width:100%;right:-100%;}.aius-panel.active{right:0;}
+.aius-header,.aius-input{width:100%;}
+.icon-circle{width:28px;height:28px;}
+.conditions-table{font-size:0.8rem;}
+.conditions-table th, .conditions-table td{padding:6px 8px;}
+.edit-btn{width:14px;height:14px;}
+}
+</style>
+</head>
+
+<body>
+<!-- HEADER -->
+<div class="header-bar">
+  <div class="customer-name" id="customerName">Customer Name</div>
+  <div class="header-actions">
+    <i class="bi bi-robot icon-btn" data-bs-toggle="tooltip" title="AIUS Module" onclick="toggleAIUS(true)"></i>
+    <button class="btn-save" onclick="saveAndExit()">Exit</button>
+  </div>
+</div>
+
+<!-- SUBNAV -->
+<nav class="subnav">
+  <a href="#" class="active" onclick="showTab(event,'summary')">Summary</a>
+  <a href="#" onclick="showTab(event,'conditions')">Conditions</a>
+  <a href="#" onclick="showTab(event,'tasks')">Tasks</a>
+  <a href="#" onclick="showTab(event,'financials')">Financials</a>
+  <a href="#" onclick="showTab(event,'notes')">Notes</a>
+</nav>
+
+<!-- CONTENT -->
+<main class="content">
+  <!-- SUMMARY -->
+  <section id="summary" class="tab-content">
+    <div class="split3">
+      <div class="card p-3 text-center">Milestones</div>
+      <div class="card p-3 text-center">Summary A</div>
+      <div class="card p-3 text-center">Summary B</div>
+      <div class="card p-3 text-center">Summary C</div>
+    </div>
+  </section>
+
+  <!-- CONDITIONS -->
+  <section id="conditions" class="tab-content d-none">
+    <div class="split-conditions">
+      <div class="filter" id="condFilters"></div>
+      <div class="checklist" id="condChecklist"></div>
+    </div>
+  </section>
+
+  <!-- TASKS -->
+  <section id="tasks" class="tab-content d-none">
+    <div class="split2">
+      <div class="filter" id="taskFilters"></div>
+      <div class="checklist" id="taskChecklist"></div>
+    </div>
+  </section>
+
+  <!-- FINANCIALS -->
+  <section id="financials" class="tab-content d-none">
+    <div class="fin-cols" id="finContainer"></div>
+  </section>
+
+  <!-- NOTES -->
+  <section id="notes" class="tab-content d-none">
+    <div class="notes-wrap">
+      <div class="note-list" id="noteList"></div>
+      <div class="note-view">
+        <textarea id="noteView" placeholder="Select or add a note..."></textarea>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- AIUS PANEL -->
+<div class="aius-overlay" id="aiusOverlay" onclick="toggleAIUS(false)"></div>
+<div class="aius-panel" id="aiusPanel">
+  <div class="aius-header">
+    <span><i class="bi bi-robot"></i> AIUS Assistant</span>
+    <i class="bi bi-x-lg" style="cursor:pointer;" onclick="toggleAIUS(false)"></i>
+  </div>
+  <div class="aius-chat" id="aiusChat">
+    <div class="chat-message ai"><div class="chat-bubble">Hello! I'm your AIUS Assistant. How can I help with this loan file?</div></div>
+  </div>
+  <div class="aius-input">
+    <div class="icon-circle"><i class="bi bi-plus"></i></div>
+    <input id="aiusInput" type="text" placeholder="Type a message..." onkeypress="handleKeyPress(event)">
+    <div class="icon-circle"><i class="bi bi-mic"></i></div>
+    <div class="icon-circle"><i class="bi bi-soundwave"></i></div>
+    <button class="btn-send" onclick="sendMessage()"><i class="bi bi-send-fill"></i></button>
+  </div>
+</div>
+
+<!-- CONDITION EDIT PANEL -->
+<div class="condition-edit-overlay" id="conditionEditOverlay" onclick="toggleConditionEdit(false)"></div>
+<div class="condition-edit-panel" id="conditionEditPanel">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;padding-bottom:1rem;border-bottom:1px solid #e0e0e0;">
+    <h6 style="margin:0;color:#28a745;">Edit Condition</h6>
+    <i class="bi bi-x-lg" style="cursor:pointer;color:#666;" onclick="toggleConditionEdit(false)"></i>
+  </div>
+  <div class="form-group">
+    <label>Condition Description</label>
+    <textarea id="editConditionDesc" placeholder="Enter condition description..."></textarea>
+  </div>
+  <div class="form-group">
+    <label>Section</label>
+    <select id="editConditionSection">
+      <option value="Credit">Credit</option>
+      <option value="Income">Income</option>
+      <option value="Assets">Assets</option>
+      <option value="Collateral">Collateral</option>
+      <option value="Compliance">Compliance</option>
+      <option value="UW">UW</option>
+    </select>
+  </div>
+  <div class="form-group">
+    <label>Owner</label>
+    <select id="editConditionOwner">
+      <option value="BO">BO</option>
+      <option value="LO">LO</option>
+      <option value="LOA">LOA</option>
+      <option value="LP1">LP1</option>
+      <option value="LP2">LP2</option>
+      <option value="UW">UW</option>
+    </select>
+  </div>
+  <div class="form-group">
+    <label>Status</label>
+    <select id="editConditionStatus">
+      <option value="pending">Pending</option>
+      <option value="completed">Completed</option>
+    </select>
+  </div>
+  <div class="form-group">
+    <label>Due Date</label>
+    <input type="date" id="editConditionDueDate">
+  </div>
+  <div class="form-check mb-3">
+    <input class="form-check-input" type="checkbox" id="editConditionPriority">
+    <label class="form-check-label" for="editConditionPriority">Priority</label>
+  </div>
+  <div class="form-check mb-3">
+    <input class="form-check-input" type="checkbox" id="editConditionCoord">
+    <label class="form-check-label" for="editConditionCoord">Coordinating</label>
+  </div>
+  <div class="condition-edit-buttons">
+    <button class="btn btn-success btn-sm" onclick="saveConditionEdit()">Save</button>
+    <button class="btn btn-secondary btn-sm" onclick="cancelConditionEdit()">Cancel</button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+/* -------------------- GLOBAL -------------------- */
+let customerName="Customer";
+let filterStatus="pending";
+let taskData={}, condData={}, finData={}, notesData={};
+const sections=["Credit","Income","Assets","Collateral","Compliance","UW"];
+const owners=["BO","LO","LOA","LP1","LP2","UW"];
+
+/* -------------------- INIT -------------------- */
+document.addEventListener("DOMContentLoaded",()=>{
+  loadCustomerName();
+  initTasksAndConditions();
+  initFinancials();
+  initNotes();
+  enableTooltips();
+});
+
+/* -------------------- HEADER -------------------- */
+function loadCustomerName(){
+  const urlParams=new URLSearchParams(window.location.search);
+  customerName=urlParams.get("name")||localStorage.getItem("customerName")||"Customer Name";
+  document.getElementById("customerName").innerText=customerName;
+  localStorage.setItem("customerName",customerName);
+}
+
+/* -------------------- TAB NAV -------------------- */
+function showTab(e,id){
+  e.preventDefault();
+  document.querySelectorAll(".subnav a").forEach(a=>a.classList.remove("active"));
+  e.target.classList.add("active");
+  document.querySelectorAll(".tab-content").forEach(t=>t.classList.add("d-none"));
+  document.getElementById(id).classList.remove("d-none");
+}
+
+/* -------------------- TASKS + CONDITIONS -------------------- */
+function initTasksAndConditions(){
+  const taskKey=`loanCentral_${customerName}_tasks`;
+  const condKey=`loanCentral_${customerName}_conditions`;
+  taskData=JSON.parse(localStorage.getItem(taskKey))||{};
+  condData=JSON.parse(localStorage.getItem(condKey))||{};
+  renderChecklist("tasks",taskData,taskKey);
+  renderChecklist("conditions",condData,condKey);
+}
+
+function renderChecklist(type,data,storageKey){
+  const filterDiv=document.getElementById(type==="tasks"?"taskFilters":"condFilters");
+  const checkDiv=document.getElementById(type==="tasks"?"taskChecklist":"condChecklist");
+
+  /* Build Filters */
+  const thirdPartyFilter = type === "conditions" ? 
+    `<div class="mb-2"><strong>3rd Party Orders</strong><br>
+      <button class="btn btn-sm btn-outline-success me-1" onclick="setFilter('${type}','thirdParty','true',this)">Yes</button>
+      <button class="btn btn-sm btn-outline-success me-1" onclick="setFilter('${type}','thirdParty','false',this)">No</button>
+    </div>` : '';
+  
+  filterDiv.innerHTML=`
+    <h6>Filters</h6>
+    <div class="mb-2"><strong>Section</strong><br>${sections.map(s=>`<button class="btn btn-sm btn-outline-success me-1 mb-1" onclick="setFilter('${type}','section','${s}',this)">${s}</button>`).join('')}</div>
+    <div class="mb-2"><strong>Status</strong><br>
+      <button class="btn btn-sm btn-outline-success me-1 active" onclick="setFilter('${type}','status','pending',this)">Pending</button>
+      <button class="btn btn-sm btn-outline-success me-1" onclick="setFilter('${type}','status','completed',this)">Completed</button>
+    </div>
+    <div class="mb-2"><strong>Owner</strong><br>${owners.map(o=>`<button class="btn btn-sm btn-outline-success me-1 mb-1" onclick="setFilter('${type}','owner','${o}',this)">${o}</button>`).join('')}</div>
+    ${thirdPartyFilter}
+    <div class="form-check form-switch"><input class="form-check-input" type="checkbox" onchange="toggleSwitch('${type}','priority',this)"> Priority</div>
+    <div class="form-check form-switch"><input class="form-check-input" type="checkbox" onchange="toggleSwitch('${type}','coord',this)"> Coordinating</div>
+  `;
+
+  data.filters={section:null,status:"pending",owner:null,priority:null,coord:null,thirdParty:null};
+
+  /* Populate Demo Checklist */
+  if(Object.keys(data).filter(k=>k!=="filters").length===0){
+    sections.forEach(sec=>{
+      for(let i=1;i<=3;i++){
+        const id=`${sec}_Item${i}`;
+        data[id]={
+          section:sec,
+          status:"pending",
+          owner:owners[i%owners.length],
+          priority:i===1,
+          coord:i===2,
+          checked:false,
+          description:`${sec} condition item ${i}`,
+          dueDate:"",
+          thirdParty:i===2
+        };
+      }
+    });
+  }
+  localStorage.setItem(storageKey,JSON.stringify(data));
+  renderFilteredList(type);
+}
+
+function renderFilteredList(type){
+  const data=type==="tasks"?taskData:condData;
+  const filters=data.filters;
+  const container=document.getElementById(type==="tasks"?"taskChecklist":"condChecklist");
+  
+  if(type === "conditions") {
+    // Render conditions as table
+    container.innerHTML=`
+      <table class="conditions-table">
+        <thead>
+          <tr>
+            <th>Actions</th>
+            <th>Start</th>
+            <th>Owner</th>
+            <th>Condition</th>
+            <th>Status</th>
+            <th>Due</th>
+          </tr>
+        </thead>
+        <tbody id="conditionsTableBody">
+        </tbody>
+      </table>
+    `;
+    
+    const tbody = document.getElementById("conditionsTableBody");
+    let hasItems = false;
+    
+    sections.forEach(sec=>{
+      Object.keys(data).forEach(k=>{
+        if(k==="filters")return;
+        const t=data[k];
+        if(t.section!==sec)return;
+        if(filters.section && t.section!==filters.section)return;
+        if(filters.status && t.status!==filters.status)return;
+        if(filters.owner && t.owner!==filters.owner)return;
+        if(filters.priority && !t.priority)return;
+        if(filters.coord && !t.coord)return;
+        if(filters.thirdParty !== null && t.thirdParty !== (filters.thirdParty === 'true'))return;
+        const hidden=t.checked&&filters.status!=="completed";
+        if(hidden)return;
+        
+        hasItems = true;
+        const row = document.createElement("tr");
+        const dueDate = t.dueDate ? new Date(t.dueDate).toLocaleDateString() : '';
+        row.innerHTML=`
+          <td>
+            <svg class="edit-btn" onclick="editCondition('${k}')" title="Edit" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M7 7H6C4.89543 7 4 7.89543 4 9V18C4 19.1046 4.89543 20 6 20H15C16.1046 20 17 19.1046 17 18V17M16 5L19 8M8 15L16 7L19 4L16 1L8 9V15Z" stroke="#28a745" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </td>
+          <td>
+            <input type="checkbox" ${t.checked?"checked":""} onchange="toggleTask('${type}','${k}')">
+          </td>
+          <td>${t.owner}</td>
+          <td>${t.description || k.replace('_',' ')}</td>
+          <td><span class="badge ${t.status==='completed'?'bg-success':'bg-warning'}">${t.status}</span></td>
+          <td>${dueDate}</td>
+        `;
+        tbody.appendChild(row);
+      });
+    });
+    
+    if(!hasItems) {
+      tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No conditions match the current filters</td></tr>';
+    }
+  } else {
+    // Render tasks as before
+    container.innerHTML="";
+    sections.forEach(sec=>{
+      const secDiv=document.createElement("div");
+      secDiv.classList.add("checklist-section");
+      secDiv.innerHTML=`<h6>${sec}</h6>`;
+      Object.keys(data).forEach(k=>{
+        if(k==="filters")return;
+        const t=data[k];
+        if(t.section!==sec)return;
+        if(filters.section && t.section!==filters.section)return;
+        if(filters.status && t.status!==filters.status)return;
+        if(filters.owner && t.owner!==filters.owner)return;
+        if(filters.priority && !t.priority)return;
+        if(filters.coord && !t.coord)return;
+        const hidden=t.checked&&filters.status!=="completed";
+        if(hidden)return;
+        const item=document.createElement("div");
+        item.className="task-item";
+        item.innerHTML=`<input type="checkbox" ${t.checked?"checked":""} onchange="toggleTask('${type}','${k}')"><label>${t.owner}: ${k.replace('_',' ')}</label>`;
+        secDiv.appendChild(item);
+      });
+      container.appendChild(secDiv);
+    });
+  }
+}
+
+function toggleTask(type,id){
+  const key=`loanCentral_${customerName}_${type}`;
+  const data=type==="tasks"?taskData:condData;
+  data[id].checked=!data[id].checked;
+  data[id].status=data[id].checked?"completed":"pending";
+  localStorage.setItem(key,JSON.stringify(data));
+  renderFilteredList(type);
+}
+
+function setFilter(type,field,value,btn){
+  const data=type==="tasks"?taskData:condData;
+  const key=`loanCentral_${customerName}_${type}`;
+  if(field==="status"){data.filters.status=value;}
+  else{data.filters[field]=data.filters[field]===value?null:value;}
+  localStorage.setItem(key,JSON.stringify(data));
+  btn.parentElement.querySelectorAll("button").forEach(b=>b.classList.remove("active"));
+  btn.classList.add("active");
+  renderFilteredList(type);
+}
+function toggleSwitch(type,field,el){
+  const data=type==="tasks"?taskData:condData;
+  const key=`loanCentral_${customerName}_${type}`;
+  data.filters[field]=el.checked;
+  localStorage.setItem(key,JSON.stringify(data));
+  renderFilteredList(type);
+}
+
+/* -------------------- CONDITION EDITING -------------------- */
+let currentEditingCondition = null;
+
+function toggleConditionEdit(show) {
+  const overlay = document.getElementById("conditionEditOverlay");
+  const panel = document.getElementById("conditionEditPanel");
+  if (show) {
+    overlay.classList.add("show");
+    panel.classList.add("show");
+  } else {
+    overlay.classList.remove("show");
+    panel.classList.remove("show");
+    setTimeout(() => overlay.style.display = "none", 300);
+  }
+}
+
+function editCondition(conditionId) {
+  currentEditingCondition = conditionId;
+  const condition = condData[conditionId];
+  
+  // Populate form fields
+  document.getElementById('editConditionDesc').value = condition.description || '';
+  document.getElementById('editConditionSection').value = condition.section || 'Credit';
+  document.getElementById('editConditionOwner').value = condition.owner || 'BO';
+  document.getElementById('editConditionStatus').value = condition.status || 'pending';
+  document.getElementById('editConditionDueDate').value = condition.dueDate || '';
+  document.getElementById('editConditionPriority').checked = condition.priority || false;
+  document.getElementById('editConditionCoord').checked = condition.coord || false;
+  
+  toggleConditionEdit(true);
+}
+
+function saveConditionEdit() {
+  if (!currentEditingCondition) return;
+  
+  const condition = condData[currentEditingCondition];
+  condition.description = document.getElementById('editConditionDesc').value;
+  condition.section = document.getElementById('editConditionSection').value;
+  condition.owner = document.getElementById('editConditionOwner').value;
+  condition.status = document.getElementById('editConditionStatus').value;
+  condition.dueDate = document.getElementById('editConditionDueDate').value;
+  condition.priority = document.getElementById('editConditionPriority').checked;
+  condition.coord = document.getElementById('editConditionCoord').checked;
+  condition.checked = condition.status === 'completed';
+  
+  const key = `loanCentral_${customerName}_conditions`;
+  localStorage.setItem(key, JSON.stringify(condData));
+  
+  renderFilteredList('conditions');
+  cancelConditionEdit();
+}
+
+function cancelConditionEdit() {
+  currentEditingCondition = null;
+  toggleConditionEdit(false);
+}
+
+/* -------------------- FINANCIALS -------------------- */
+function initFinancials(){
+  const key=`loanCentral_${customerName}_financials`;
+  finData=JSON.parse(localStorage.getItem(key))||{
+    loan:{amount:"",rate:"",term:""},
+    income:{gross:"",debts:"",dti:""},
+    assets:{assets:"",liabilities:"",cash:""}
+  };
+  const f=document.getElementById("finContainer");
+  f.innerHTML=`
+  <div class="fin-box"><h6>Loan</h6>
+    <input id="loan_amount" placeholder="Loan Amount" value="${finData.loan.amount}" onblur="saveFin(this)">
+    <input id="loan_rate" placeholder="Interest Rate" value="${finData.loan.rate}" onblur="saveFin(this)">
+    <input id="loan_term" placeholder="Term (months)" value="${finData.loan.term}" onblur="saveFin(this)">
+  </div>
+  <div class="fin-box"><h6>Income / Expenses</h6>
+    <input id="income_gross" placeholder="Gross Income" value="${finData.income.gross}" onblur="saveFin(this)">
+    <input id="income_debts" placeholder="Monthly Debts" value="${finData.income.debts}" onblur="saveFin(this)">
+    <input id="income_dti" placeholder="DTI" value="${finData.income.dti}" onblur="saveFin(this)">
+  </div>
+  <div class="fin-box"><h6>Assets / Liabilities</h6>
+    <input id="assets_assets" placeholder="Assets" value="${finData.assets.assets}" onblur="saveFin(this)">
+    <input id="assets_liabilities" placeholder="Liabilities" value="${finData.assets.liabilities}" onblur="saveFin(this)">
+    <input id="assets_cash" placeholder="Cash to Close" value="${finData.assets.cash}" onblur="saveFin(this)">
+  </div>`;
+}
+function saveFin(el){
+  const id=el.id.split("_");
+  finData[id[0]][id[1]]=el.value;
+  localStorage.setItem(`loanCentral_${customerName}_financials`,JSON.stringify(finData));
+}
+
+/* -------------------- NOTES -------------------- */
+function initNotes(){
+  const key=`loanCentral_${customerName}_notes`;
+  notesData=JSON.parse(localStorage.getItem(key))||[];
+  renderNotes();
+}
+function renderNotes(){
+  const list=document.getElementById("noteList");
+  list.innerHTML=`
+    <button class="btn btn-sm btn-success mb-2 w-100" onclick="addNote()">+ New Note</button>
+    ${notesData.map((n,i)=>`<div class="note-item" onclick="selectNote(${i})">${n.title||"Untitled"}</div>`).join("")}`;
+}
+function addNote(){
+  notesData.push({title:"New Note",content:""});
+  saveNotes();renderNotes();
+}
+function selectNote(i){
+  document.querySelectorAll(".note-item").forEach((el,idx)=>el.classList.toggle("active",idx===i));
+  const note=notesData[i];const area=document.getElementById("noteView");
+  area.value=note.content;
+  area.onblur=()=>{notesData[i].content=area.value;saveNotes();};
+}
+function saveNotes(){localStorage.setItem(`loanCentral_${customerName}_notes`,JSON.stringify(notesData));}
+
+/* -------------------- SAVE & EXIT -------------------- */
+function saveAndExit(){
+  localStorage.setItem(`loanCentral_${customerName}_tasks`,JSON.stringify(taskData));
+  localStorage.setItem(`loanCentral_${customerName}_conditions`,JSON.stringify(condData));
+  localStorage.setItem(`loanCentral_${customerName}_financials`,JSON.stringify(finData));
+  localStorage.setItem(`loanCentral_${customerName}_notes`,JSON.stringify(notesData));
+  window.location.href="index.html";
+}
+
+/* -------------------- AIUS PANEL -------------------- */
+function toggleAIUS(show){
+  const overlay=document.getElementById("aiusOverlay");
+  const panel=document.getElementById("aiusPanel");
+  if(show){overlay.classList.add("show");panel.classList.add("active");}
+  else{overlay.classList.remove("show");panel.classList.remove("active");setTimeout(()=>overlay.style.display="none",300);}
+}
+
+/* -------------------- CHAT -------------------- */
+function sendMessage(){
+  const input=document.getElementById("aiusInput");
+  const chat=document.getElementById("aiusChat");
+  const msg=input.value.trim();
+  if(!msg)return;
+  chat.insertAdjacentHTML("beforeend",`<div class="chat-message user"><div class="chat-bubble">${msg}</div></div>`);
+  input.value="";
+  scrollChat();
+  setTimeout(()=>{
+    chat.insertAdjacentHTML("beforeend",`<div class="chat-message ai"><div class="chat-bubble">Got it. I'll check that for you.</div></div>`);
+    scrollChat();
+  },600);
+}
+function handleKeyPress(e){if(e.key==="Enter")sendMessage();}
+function scrollChat(){const chat=document.getElementById("aiusChat");chat.scrollTop=chat.scrollHeight;}
+
+/* -------------------- TOOLTIP -------------------- */
+function enableTooltips(){
+  const t=[].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+  t.map(el=>new bootstrap.Tooltip(el));
+}
+</script>
+</body>
+</html>

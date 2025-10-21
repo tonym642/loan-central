@@ -1,0 +1,1341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Loan Central</title>
+<link rel="icon" type="image/png" href="assets/img/favicon.png" />
+
+<!-- Bootstrap / Icons / Fonts -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+:root{
+  --bottom-nav-height: 55px; /* Compact bottom nav height */
+}
+/* Global BizCore360 Font Style */
+body{
+  font-family: 'Inter', 'Poppins', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.4;
+  color: #212529;
+  background: #f9fafb;
+  margin: 0;
+  /* Ensure content isn't hidden behind fixed bottom nav */
+  padding-bottom: var(--bottom-nav-height);
+}
+
+/* Headings */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Inter', 'Poppins', sans-serif;
+  font-weight: 500;
+  color: #212529;
+}
+h1 { font-size: 18px; }
+h2 { font-size: 17px; }
+h3 { font-size: 16px; }
+h4 { font-size: 15px; }
+h5 { font-size: 15px; }
+h6 { font-size: 14px; }
+
+/* HEADER */
+.header-bar {
+  background: #fff;
+  border-bottom: 1px solid #e0e0e0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  padding: .6rem 1rem;
+}
+.icon-btn {
+  color: #555;
+  font-size: 1.3rem;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.icon-btn:hover { color: #28a745; }
+.app-title {
+  font-weight: 600;
+  color: #333;
+  font-size: 1rem;
+}
+
+/* Dashboard */
+.dashboard{
+  padding: 1rem;
+  min-height: calc(100vh - 120px); /* Full height minus header and bottom nav */
+}
+
+.dashboard-grid{
+  height: calc(100vh - 150px); /* Full height minus header, bottom nav, and padding */
+}
+
+/* Cards - BizCore360 Style */
+.card, .dashboard-box, .table-container{
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  padding: 1rem;
+  margin-bottom: 1rem;
+  background: #fff;
+  overflow: hidden;
+}
+
+/* Priorities embedded page cards */
+.priorities-panel{
+  background:#fff;
+  border:1px solid #e5e7eb;
+  border-radius:6px;
+  box-shadow:0 1px 4px rgba(0,0,0,0.08);
+  padding:1rem;
+}
+/* Priorities page styles */
+.priorities-title{font-size:1.1rem;font-weight:600;color:#28a745;margin-bottom:1rem;}
+.priorities-table{width:100%;border-collapse:collapse;font-size:.95rem;}
+.priorities-table th,.priorities-table td{padding:10px 12px;border-bottom:1px solid #e5e7eb;background:#fff;text-align:left;}
+.priorities-table th{position:sticky;top:0;background:#e8f5e8;color:#28a745;font-weight:600;z-index:2;}
+.priorities-table tbody{display:table-row-group;max-height:unset;overflow:visible;}
+/* Use natural table layout; widths controlled via colgroup */
+.star{cursor:pointer;font-size:1.1rem;color:#6c757d;transition:color .2s;}
+.star.priority{color:#28a745;}
+.scroll-panel{overflow-y:auto;max-height:420px;}
+
+.dashboard-grid .card{
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  margin-bottom: 0;
+}
+
+.card h6{
+  font-weight: 500;
+  font-size: 14px;
+  margin-bottom: .6rem;
+  color: #212529;
+}
+
+canvas{
+  flex: 1;
+  min-height: 200px;
+  max-height: 300px;
+}
+/* Give pie charts more vertical space to avoid legend clipping */
+#chartType, #chartProgram{ height: 260px !important; }
+
+/* Table */
+.table-container{
+  overflow-x: auto;
+  padding-bottom: 5rem;
+  padding: 0;
+}
+
+.table{
+  min-width: 1200px;
+  background: #fff;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e5e7eb;
+  margin: 0;
+  border-collapse: collapse;
+}
+/* Left align all app tables */
+.table th, .table td { text-align: left; }
+
+.table th{
+  background: #28a745;
+  color: #fff;
+  font-weight: 500;
+  font-size: 13px;
+  text-align: center;
+  vertical-align: middle;
+  border-left: none;
+  border-right: none;
+  border-bottom: 1px solid #28a745;
+}
+
+.table th:first-child{
+  border-left: none;
+}
+
+.table th:last-child{
+  border-right: none;
+}
+
+.table td{
+  text-align: center;
+  vertical-align: middle;
+  font-size: 13px;
+  font-weight: 400;
+  color: #212529;
+  border-left: none;
+  border-right: none;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.table td:first-child{
+  text-align: center;
+  border-left: none;
+}
+
+.table td:last-child{
+  border-right: none;
+}
+
+.table td.customer-name{
+  text-align: left;
+  font-weight: 500;
+}
+
+.table-hover tbody tr:hover{
+  background: #f8f9fa;
+  cursor: pointer;
+}
+
+/* Status Text - Removed Bold */
+.text-pending, .status-text.text-pending{
+  color: #dc3545;
+  font-weight: normal;
+}
+
+.text-complete, .status-text.text-complete{
+  color: #28a745;
+  font-weight: normal;
+}
+
+.status-text{
+  font-weight: normal;
+}
+
+/* Star */
+.star{
+  cursor: pointer;
+  font-size: 14px;
+  color: #6c757d;
+  transition: all 0.3s ease;
+}
+
+.star.active{
+  color: #28a745;
+}
+
+/* Bottom Nav - new design */
+.bottom-nav {
+  display: flex;
+  justify-content: space-around;
+  background: #fff;
+  border-top: 1px solid #eaeaea;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  height: 55px;
+  z-index: 10;
+}
+
+.nav-btn {
+  flex: 1;
+  text-align: center;
+  color: #666;
+  background: none;
+  border: none;
+  padding: 5px;
+  font-size: 12px;
+}
+
+.nav-btn i {
+  display: block;
+  font-size: 18px;
+  margin-bottom: 2px;
+}
+
+.nav-btn.active {
+  color: #00b050;
+}
+
+.page {
+  display: none;
+  padding-bottom: 80px; /* space above bottom nav */
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.page.active {
+  display: block;
+  opacity: 1;
+}
+
+/* Pipeline pills */
+.pipeline-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin: 10px auto 15px;
+  max-width: 600px;
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 6px 10px;
+  font-size: 13px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  background: #f4f4f4;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tab-btn.active {
+  background: #00b050;
+  color: #fff;
+  border-color: #00b050;
+}
+
+.count { font-weight: 600; }
+
+.pipeline-header {
+  display: flex;
+  justify-content: flex-end;
+  margin: 10px 15px 0;
+}
+
+.add-file-btn {
+  background: #00b050;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.add-file-btn:hover { background: #009245; }
+
+/* Lists and List Items */
+.list-group-item, .dropdown-item{
+  font-size: 13px;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  background: #fff;
+}
+
+/* Responsive Grid */
+@media(min-width:992px){
+  .dashboard-grid{
+    display: grid;
+    grid-template-columns: repeat(3,1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 1rem;
+  }
+}
+
+@media(max-width:991px){
+  .dashboard-grid .card{
+    min-height: 280px;
+  }
+}
+
+/* Additional BizCore360 Consistency */
+.btn{
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 6px;
+}
+
+.form-control, .form-select{
+  font-size: 14px;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+}
+
+.badge{
+  font-size: 12px;
+  border-radius: 6px;
+}
+
+.alert{
+  font-size: 14px;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+}
+
+/* SEARCH OVERLAY */
+.search-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.45);
+  display: none;
+  z-index: 300;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.search-overlay.show {
+  display: flex;
+  opacity: 1;
+}
+
+.search-container {
+  background: #fff;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.search-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid #e0e0e0;
+  background: #28a745;
+  color: #fff;
+  border-radius: 8px 8px 0 0;
+}
+
+.search-header h6 {
+  margin: 0;
+  font-weight: 600;
+}
+
+.search-header i {
+  cursor: pointer;
+  font-size: 1.2rem;
+}
+
+.search-body {
+  padding: 1.5rem;
+}
+
+/* AIUS PANEL */
+.aius-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.45);
+  display: none;
+  z-index: 200;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.aius-overlay.show {
+  display: block;
+  opacity: 1;
+}
+
+.aius-panel {
+  position: fixed;
+  top: 0;
+  right: -400px;
+  width: 380px;
+  height: 100%;
+  background: #fff;
+  box-shadow: -4px 0 10px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  border-top-left-radius: 6px;
+  border-bottom-left-radius: 6px;
+  transition: right 0.35s ease;
+  z-index: 201;
+}
+
+.aius-panel.active {
+  right: 0;
+}
+
+.aius-header {
+  position: fixed;
+  top: 0;
+  width: 380px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid #e0e0e0;
+  background: #28a745;
+  color: #fff;
+  border-top-left-radius: 6px;
+  z-index: 202;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.aius-chat {
+  flex: 1;
+  margin-top: 60px;
+  margin-bottom: 70px;
+  padding: 1rem;
+  overflow-y: auto;
+}
+
+.chat-message {
+  margin-bottom: 1rem;
+  display: flex;
+}
+
+.chat-message.user {
+  justify-content: flex-end;
+}
+
+.chat-bubble {
+  max-width: 80%;
+  padding: 0.6rem 0.9rem;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.chat-message.user .chat-bubble {
+  background: #28a745;
+  color: #fff;
+}
+
+.aius-input {
+  position: fixed;
+  bottom: 0;
+  width: 380px;
+  padding: 0.5rem;
+  border-top: 1px solid #e0e0e0;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #fff;
+  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.08);
+  z-index: 202;
+}
+
+.aius-input input {
+  flex: 1;
+  border: 1px solid #ddd;
+  border-radius: 30px;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.9rem;
+  outline: none;
+}
+
+.btn-send {
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: #28a745;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+.btn-send:hover {
+  background: #218838;
+}
+
+@media (max-width: 768px) {
+  .aius-panel {
+    width: 100%;
+    right: -100%;
+  }
+  
+  .aius-panel.active {
+    right: 0;
+  }
+  
+  .aius-header,
+  .aius-input {
+    width: 100%;
+  }
+  
+  .search-container {
+    width: 95%;
+    margin: 1rem;
+  }
+}
+</style>
+</head>
+
+<body>
+<header class="header-bar">
+  <div class="d-flex align-items-center justify-content-between">
+    <div class="d-flex align-items-center gap-2">
+      <i class="bi bi-list icon-btn" onclick="toggleSidebar()" title="Menu"></i>
+      <i class="bi bi-house icon-btn" onclick="goHome()" title="Home"></i>
+      <h6 class="app-title mb-0"><strong></strong>Loan Central</strong></h6>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+      <i class="bi bi-search icon-btn" onclick="toggleSearch()" title="Search"></i>
+      <a href="#" onclick="switchPage('priorities'); return false;" data-bs-toggle="tooltip" data-bs-placement="bottom" title="View Priorities">
+        <i class="bi bi-star icon-btn text-secondary"></i>
+      </a>
+      <i class="bi bi-robot icon-btn" onclick="toggleAIUS(true)" title="AI Assistant"></i>
+    </div>
+  </div>
+</header>
+
+<!-- Dashboard/Main Frame -->
+<div id="page-dashboard" class="page active">
+  <div id="dashboardPage" class="dashboard">
+  <div class="dashboard-grid">
+    <div class="card"><h6><strong>In Escrow by Units</strong></h6><canvas id="chartUnits"></canvas></div>
+    <div class="card"><h6><strong>In Escrow by Volume</strong></h6><canvas id="chartVolume"></canvas></div>
+    <div class="card"><h6><strong>In Escrow by Commissions</strong></h6><canvas id="chartComms"></canvas></div>
+    <div class="card"><h6><strong>In Escrow by Type</strong></h6><canvas id="chartType"></canvas></div>
+    <div class="card"><h6><strong>In Escrow by Program</strong></h6><canvas id="chartProgram"></canvas></div>
+    <div class="card"><h6><strong>In Escrow by Milestone</strong></h6><canvas id="chartMilestone"></canvas></div>
+    </div>
+  </div>
+</div>
+<!-- Priorities Page (hidden by default) -->
+<div id="prioritiesPage" class="container-fluid py-4 d-none">
+  <div class="row g-4">
+    <div class="col-12 col-md-6">
+      <div class="priorities-panel h-100">
+  <div class="priorities-title d-flex align-items-center">Conditions</div>
+        <div class="scroll-panel">
+          <table class="priorities-table text-start" id="prioConditionsTable">
+            <colgroup>
+              <col style="width:40px">
+              <col style="width:40px">
+              <col>
+              <col>
+            </colgroup>
+            <thead>
+              <tr>
+                <th style="width:40px;"></th>
+                <th style="width:40px;"></th>
+                <th>Customer</th>
+                <th>Condition</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-md-6">
+      <div class="priorities-panel h-100">
+  <div class="priorities-title d-flex align-items-center">Tasks</div>
+        <div class="scroll-panel">
+          <table class="priorities-table text-start" id="prioTasksTable">
+            <colgroup>
+              <col style="width:40px">
+              <col style="width:40px">
+              <col>
+              <col>
+            </colgroup>
+            <thead>
+              <tr>
+                <th style="width:40px;"></th>
+                <th style="width:40px;"></th>
+                <th>Customer</th>
+                <th>Task</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Note: Rendering handled by functions below in main script -->
+  </div>
+<!-- Main Frame for embedded pages -->
+<iframe id="mainFrame" src="" style="width:100%;height:600px;border:none;display:none;"></iframe>
+
+<!-- Customers Table -->
+<div id="page-pipeline" class="page">
+  <div id="customersPage" class="container-fluid py-4">
+    <div class="pipeline-header">
+      <button id="addFileBtn" class="add-file-btn">
+        <i class="bi bi-plus-circle"></i> Add New File
+      </button>
+    </div>
+    <div class="pipeline-tabs" id="pipelineTabs">
+      <button class="tab-btn active" id="tab-prospects">
+        Prospects (<span class="count" id="count-prospects">0</span>)
+      </button>
+      <button class="tab-btn" id="tab-escrow">
+        Escrow (<span class="count" id="count-escrow">0</span>)
+      </button>
+      <button class="tab-btn" id="tab-funded">
+        Funded (<span class="count" id="count-funded">0</span>)
+      </button>
+    </div>
+  <h5 class="mb-3" id="customerPageTitle"><strong>Customers</strong></h5>
+  <div class="table-container">
+  <table class="table table-hover align-middle">
+    <thead>
+      <tr>
+        <th>⭐</th><th>Customer</th><th>Milestone</th><th>LO</th><th>LO2</th><th>SM</th>
+        <th>Buyer's Agent</th><th>Type</th><th>Loan Amount</th><th>Program</th>
+        <th>COE</th><th>Date Closed</th><th>Appraisal</th><th>CD Status</th><th>Status</th>
+      </tr>
+    </thead>
+    <tbody id="customerBody"></tbody>
+  </table>
+    </table>
+    </div>
+  </div>
+</div>
+
+<!-- Admin -->
+<div id="page-aius" class="page">
+  <!-- The AIUS panel/overlay remains; provide a placeholder page section if needed -->
+  <div class="container py-4">
+    <h5><strong>AIUS</strong></h5>
+    <p class="text-muted">Use the AI Assistant panel via the bottom-right icon, or keep this area for future AIUS dashboard content.</p>
+  </div>
+</div>
+
+<div id="page-admin" class="page">
+  <div class="container py-4">
+    <h5><strong>Admin</strong></h5>
+    <p class="text-muted">Admin settings and tools will appear here.</p>
+  </div>
+  
+</div>
+
+<!-- Bottom Nav -->
+<div class="bottom-nav">
+  <button class="nav-btn" id="nav-dashboard">
+    <i class="bi bi-house"></i><span>Dashboard</span>
+  </button>
+  <button class="nav-btn active" id="nav-pipeline">
+    <i class="bi bi-people"></i><span>Pipeline</span>
+  </button>
+  <button class="nav-btn" id="nav-aius">
+    <i class="bi bi-robot"></i><span>AIUS</span>
+  </button>
+  <button class="nav-btn" id="nav-admin">
+    <i class="bi bi-gear"></i><span>Admin</span>
+  </button>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+/* ----------- Sample Data ----------- */
+let customers=[
+  {id:1,name:"John Doe",milestone:"06 Processing",lo:"TM",lo2:"JS",sm:"LP",agent:"Tony Medina Jr",type:"Purchase",amount:354598,program:"FHA",coe:"2025-10-25",closed:"Pending",appraisal:"Pending",cd:"Pending",status:"Lead"},
+  {id:2,name:"Sarah Smith",milestone:"07 Escrow",lo:"TM",lo2:"JS",sm:"LP",agent:"Tony Medina Jr",type:"Refinance",amount:420000,program:"Conv",coe:"2025-09-10",closed:"Pending",appraisal:"Pending",cd:"Pending",status:"Escrow"},
+  {id:3,name:"David Brown",milestone:"08 Funded",lo:"TM",lo2:"NA",sm:"LP",agent:"Tony Medina Jr",type:"Purchase",amount:265000,program:"VA",coe:"2025-07-14",closed:"2025-08-02",appraisal:"Complete",cd:"Complete",status:"Funded"},
+  {id:4,name:"Emily Davis",milestone:"07 Escrow",lo:"TM",lo2:"JS",sm:"LP",agent:"Tony Medina Jr",type:"Purchase",amount:520000,program:"Conv",coe:"2025-09-01",closed:"Pending",appraisal:"Pending",cd:"Pending",status:"Escrow"}
+];
+let priorities=JSON.parse(localStorage.getItem("loanCentral_priorities")||"[]");
+
+/* ----------- Page Switch ----------- */
+function switchPage(page){
+  document.querySelectorAll('.nav-btn').forEach(a=>a.classList.remove('active'));
+  document.getElementById('dashboardPage').classList.add('d-none');
+  document.getElementById('customersPage').classList.add('d-none');
+  document.getElementById('adminPage').classList.add('d-none');
+  document.getElementById('prioritiesPage').classList.add('d-none');
+  // Hide pipeline tabs by default
+  const pipelineTabs=document.getElementById('pipelineTabs');
+  if(pipelineTabs) pipelineTabs.style.display='none';
+
+  if(page==='pipeline'){
+    document.getElementById('customersPage').classList.remove('d-none');
+    if(pipelineTabs) pipelineTabs.style.display='flex';
+    activatePipelineTab('Prospects');
+    showCustomers('Lead');
+  }
+  else if(page==='admin'){
+    document.getElementById('adminPage').classList.remove('d-none');
+    document.getElementById('navAdmin').classList.add('active');
+  }
+  else if(page==='priorities'){
+    document.getElementById('prioritiesPage').classList.remove('d-none');
+    renderPrioritiesConditions();
+    renderPrioritiesTasks();
+  }
+  else {
+    document.getElementById('dashboardPage').classList.remove('d-none');
+  }
+}
+
+function activatePipelineTab(name){
+  const map={Prospects:'tab-prospects',Escrow:'tab-escrow',Funded:'tab-funded'};
+  document.querySelectorAll('.tab-btn').forEach(t=>t.classList.remove('active'));
+  const id=map[name];
+  if(id){
+    const btn=document.getElementById(id);
+    if(btn) btn.classList.add('active');
+  }
+}
+
+// ---- Priorities (embedded) ----
+function getAllPriorities(type){
+  let list=[];
+  for(let key in localStorage){
+    if(key.startsWith('loanCentral_') && key.endsWith('_'+type)){
+      const data=JSON.parse(localStorage.getItem(key)||'{}');
+      for(let k in data){
+        const item=data[k];
+        if(item.priority==='Yes'){
+          list.push({customer:key.split('_')[1],...item,id:k,storageKey:key});
+        }
+      }
+    }
+  }
+  return list;
+}
+
+function renderPrioritiesConditions(){
+  const tbody=document.querySelector('#prioConditionsTable tbody');
+  if(!tbody) return;
+  tbody.innerHTML='';
+  const items=getAllPriorities('conditions');
+  if(items.length===0){
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td colspan="4" class="text-muted py-3">No priority conditions yet.</td>`;
+    tbody.appendChild(tr);
+    return;
+  }
+  items.forEach(item=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td><input type="checkbox" class="form-check-input" ${item.status==='completed'?'checked':''} onchange="toggleConditionCleared('${item.storageKey}','${item.id}',this)"></td>
+      <td><i class="bi bi-star-fill star priority" onclick="togglePriorityType('conditions','${item.storageKey}','${item.id}',this)"></i></td>
+      <td>${item.customer}</td>
+      <td>${item.description || item.id.replace('_',' ')}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+function renderPrioritiesTasks(){
+  const tbody=document.querySelector('#prioTasksTable tbody');
+  if(!tbody) return;
+  tbody.innerHTML='';
+  const items=getAllPriorities('tasks');
+  if(items.length===0){
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td colspan="4" class="text-muted py-3">No priority tasks yet.</td>`;
+    tbody.appendChild(tr);
+    return;
+  }
+  items.forEach(item=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td><input type="checkbox" class="form-check-input" ${item.status==='completed'?'checked':''} onchange="toggleTaskCleared('${item.storageKey}','${item.id}',this)"></td>
+      <td><i class="bi bi-star-fill star priority" onclick="togglePriorityType('tasks','${item.storageKey}','${item.id}',this)"></i></td>
+      <td>${item.customer}</td>
+      <td>${item.description || item.id.replace('_',' ')}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function togglePriorityType(type, storageKey, id, el){
+  const data=JSON.parse(localStorage.getItem(storageKey)||'{}');
+  if(data[id].priority==='Yes'){
+    data[id].priority='No';
+    el.classList.remove('priority');
+    el.classList.remove('bi-star-fill');
+    el.classList.add('bi-star');
+  }else{
+    data[id].priority='Yes';
+    el.classList.add('priority');
+    el.classList.remove('bi-star');
+    el.classList.add('bi-star-fill');
+  }
+  localStorage.setItem(storageKey,JSON.stringify(data));
+  // re-render panel
+  if(type==='conditions') renderPrioritiesConditions(); else renderPrioritiesTasks();
+}
+
+function toggleConditionCleared(storageKey,id,el){
+  const data=JSON.parse(localStorage.getItem(storageKey)||'{}');
+  data[id].status=el.checked?'completed':'pending';
+  localStorage.setItem(storageKey,JSON.stringify(data));
+}
+function toggleTaskCleared(storageKey,id,el){
+  const data=JSON.parse(localStorage.getItem(storageKey)||'{}');
+  data[id].status=el.checked?'completed':'pending';
+  localStorage.setItem(storageKey,JSON.stringify(data));
+}
+// Remove stray bracket
+// Ensure dashboard loads by default on page load
+document.addEventListener('DOMContentLoaded', function() {
+  updateCharts();
+  // Wire up bottom nav buttons
+  const navButtons={
+    dashboard: document.getElementById('nav-dashboard'),
+    pipeline: document.getElementById('nav-pipeline'),
+    aius: document.getElementById('nav-aius'),
+    admin: document.getElementById('nav-admin')
+  };
+  const setActive=(btn)=>{
+    document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+  };
+  if(navButtons.dashboard){
+    navButtons.dashboard.addEventListener('click',()=>{
+      setActive(navButtons.dashboard);
+      document.getElementById('page-dashboard').classList.add('active');
+      document.getElementById('page-pipeline').classList.remove('active');
+      document.getElementById('page-aius').classList.remove('active');
+      document.getElementById('page-admin').classList.remove('active');
+      updateCharts();
+    });
+  }
+  if(navButtons.pipeline){
+    navButtons.pipeline.addEventListener('click',()=>{
+      setActive(navButtons.pipeline);
+      // Default to Prospects tab on open
+      activatePipelineTab('Prospects');
+      showCustomers('Lead');
+      document.getElementById('page-dashboard').classList.remove('active');
+      document.getElementById('page-aius').classList.remove('active');
+      document.getElementById('page-admin').classList.remove('active');
+      document.getElementById('page-pipeline').classList.add('active');
+    });
+  }
+  if(navButtons.aius){
+    navButtons.aius.addEventListener('click',()=>{
+      setActive(navButtons.aius);
+      document.getElementById('page-dashboard').classList.remove('active');
+      document.getElementById('page-pipeline').classList.remove('active');
+      document.getElementById('page-admin').classList.remove('active');
+      document.getElementById('page-aius').classList.add('active');
+    });
+  }
+  if(navButtons.admin){
+    navButtons.admin.addEventListener('click',()=>{
+      setActive(navButtons.admin);
+      document.getElementById('page-dashboard').classList.remove('active');
+      document.getElementById('page-pipeline').classList.remove('active');
+      document.getElementById('page-aius').classList.remove('active');
+      document.getElementById('page-admin').classList.add('active');
+    });
+  }
+  // Pipeline tabs switching
+  const tabs=document.querySelectorAll('.tab-btn');
+  const tableBody=document.querySelector('#customersPage table tbody');
+
+  function getRows(){ return tableBody ? tableBody.querySelectorAll('tr') : []; }
+
+  function updateCounts(){
+    const rows=getRows();
+    const counts={prospects:0,escrow:0,funded:0};
+    rows.forEach(row=>{
+      const statusCell=row.querySelector('td:last-child');
+      if(!statusCell) return;
+      const status=statusCell.textContent.trim().toLowerCase();
+      if(status.includes('lead')) counts.prospects++;
+      if(status.includes('escrow')) counts.escrow++;
+      if(status.includes('funded')) counts.funded++;
+    });
+    const el=(id,v)=>{const e=document.getElementById(id); if(e) e.textContent=v;};
+    el('count-prospects',counts.prospects);
+    el('count-escrow',counts.escrow);
+    el('count-funded',counts.funded);
+  }
+
+  function filterRows(filter){
+    getRows().forEach(row=>{
+      const statusCell=row.querySelector('td:last-child');
+      if(!statusCell) return;
+      const status=statusCell.textContent.trim().toLowerCase();
+      const match=(filter==='prospects' && status.includes('lead'))||
+                  (filter==='escrow' && status.includes('escrow'))||
+                  (filter==='funded' && status.includes('funded'));
+      row.style.display=match?'':'none';
+    });
+  }
+
+  tabs.forEach(tab=>{
+    tab.addEventListener('click',()=>{
+      tabs.forEach(t=>t.classList.remove('active'));
+      tab.classList.add('active');
+      const filter=tab.id.replace('tab-','');
+      // If you want to fetch fresh rows based on category, uncomment these and remove filterRows
+      if(filter==='prospects') showCustomers('Lead');
+      else if(filter==='escrow') showCustomers('Escrow');
+      else if(filter==='funded') showCustomers('Funded');
+      // After rows rendered, update counts and ensure filtering (in case showCustomers returns a superset)
+      setTimeout(()=>{ updateCounts(); filterRows(filter); }, 0);
+    });
+  });
+
+  // Add New File button
+  const addBtn=document.getElementById('addFileBtn');
+  if(addBtn && tableBody){
+    addBtn.addEventListener('click',()=>{
+      const nextId = (customers.reduce((m,c)=>Math.max(m,c.id),0) + 1) || 1;
+      const obj = { id: nextId, name: 'New Customer', milestone: '01 Intake', lo: 'TM', lo2: 'JS', sm: 'LP', agent: 'Agent Name', type: 'Purchase', amount: 0, program: 'FHA', coe: 'Pending', closed: 'Pending', appraisal: 'Pending', cd: 'Pending', status: 'Lead' };
+      customers.push(obj);
+      // Re-render current filter based on active tab
+      const activeTab = document.querySelector('.tab-btn.active');
+      const filter = activeTab ? activeTab.id.replace('tab-','') : 'prospects';
+      if(filter==='prospects') showCustomers('Lead');
+      else if(filter==='escrow') showCustomers('Escrow');
+      else if(filter==='funded') showCustomers('Funded');
+      setTimeout(()=>{ updateCounts(); }, 0);
+    });
+  }
+
+  // Observe body for dynamic updates to auto-refresh counts
+  if(tableBody){
+    const observer=new MutationObserver(()=>{ updateCounts(); });
+    observer.observe(tableBody,{childList:true,subtree:true});
+  }
+
+  // Initialize counts and default filter once customers are first rendered
+  setTimeout(()=>{ updateCounts(); filterRows('prospects'); }, 0);
+  // Set initial state to Pipeline active
+  if(navButtons.pipeline){ navButtons.pipeline.click(); }
+});
+
+/* ----------- Table Rendering ----------- */
+function showCustomers(filter){
+  const body=document.getElementById('customerBody');
+  body.innerHTML='';
+  const filtered=customers.filter(c=>c.status===filter);
+  document.getElementById('customerPageTitle').textContent=`${filter} Files`;
+  filtered.forEach(c=>{
+    const tr=document.createElement('tr');
+  const priorityClass=priorities.includes(c.id)?'active':'';
+  const starIcon=priorities.includes(c.id)?'bi-star-fill':'bi-star';
+    tr.innerHTML=`
+  <td><i class="bi ${starIcon} star ${priorityClass}" onclick="event.stopPropagation(); togglePriority(${c.id},this)"></i></td>
+      <td class="customer-name">${c.name}</td>
+      <td>${c.milestone}</td><td>${c.lo}</td><td>${c.lo2}</td><td>${c.sm}</td>
+      <td>${c.agent}</td><td>${c.type}</td>
+      <td>$${c.amount.toLocaleString()}</td><td>${c.program}</td>
+      <td>${formatDate(c.coe)}</td><td>${formatDate(c.closed)}</td>
+      <td class="${statusColor(c.appraisal)} status-text">${c.appraisal}</td>
+      <td class="${statusColor(c.cd)} status-text">${c.cd}</td>
+      <td><span class="badge ${getStatusBadgeColor(c.status)}">${c.status}</span></td>`;
+    tr.onclick = () => window.location.href = `customer.html?name=${encodeURIComponent(c.name)}`;
+    tr.style.cursor = 'pointer';
+    tr.dataset.id = c.id;
+    body.appendChild(tr);
+  });
+  // enable inline editing on table cells
+  attachRowEditingHandlers(body);
+  document.getElementById('customersPage').classList.remove('d-none');
+}
+function statusColor(v){return v==="Pending"?"text-pending":"text-complete";}
+function getStatusBadgeColor(status){
+  switch(status){
+    case 'Lead': return 'bg-warning';
+    case 'Escrow': return 'bg-primary';
+    case 'Funded': return 'bg-success';
+    default: return 'bg-secondary';
+  }
+}
+function formatDate(date){if(date==="Pending")return "Pending";const d=new Date(date);return !isNaN(d)?d.toLocaleDateString("en-US"):"";}
+function togglePriority(id,el){
+  if(priorities.includes(id)){
+    priorities=priorities.filter(f=>f!==id);
+    el.classList.remove('active');
+    el.classList.remove('bi-star-fill');
+    el.classList.add('bi-star');
+  }
+  else{
+    priorities.push(id);
+    el.classList.add('active');
+    el.classList.remove('bi-star');
+    el.classList.add('bi-star-fill');
+  }
+  localStorage.setItem("loanCentral_priorities",JSON.stringify(priorities));
+}
+
+/* ----------- Inline Editing for Pipeline Table ----------- */
+function attachRowEditingHandlers(body){
+  const rows = body.querySelectorAll('tr');
+  rows.forEach(tr => {
+    const id = parseInt(tr.dataset.id, 10);
+    const cells = Array.from(tr.children);
+    cells.forEach((td, idx) => {
+      // skip star (0) and status badge (last)
+      if (idx === 0 || idx === cells.length - 1) return;
+      td.addEventListener('dblclick', (e) => {
+        e.stopPropagation();
+        startCellEdit(td, id, idx);
+      });
+    });
+  });
+}
+
+function startCellEdit(td, id, cellIndex){
+  // prevent navigation while editing
+  const tr = td.closest('tr');
+  const originalOnClick = tr.onclick;
+  tr.onclick = null;
+
+  td.contentEditable = 'true';
+  td.classList.add('editing-cell');
+  td.focus();
+  selectElementText(td);
+
+  function finish(save=true){
+    td.contentEditable = 'false';
+    td.classList.remove('editing-cell');
+    if(save){
+      persistCellChange(id, cellIndex, td.innerText.trim(), td);
+    }
+    // restore row navigation
+    tr.onclick = originalOnClick;
+  }
+
+  td.addEventListener('keydown', function onKey(e){
+    if(e.key === 'Enter') { e.preventDefault(); finish(true); td.removeEventListener('keydown', onKey); }
+    if(e.key === 'Escape'){ e.preventDefault(); finish(false); td.removeEventListener('keydown', onKey); }
+  });
+  td.addEventListener('blur', function onBlur(){ finish(true); td.removeEventListener('blur', onBlur); });
+}
+
+function selectElementText(el){
+  const range = document.createRange();
+  range.selectNodeContents(el);
+  const sel = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+}
+
+function persistCellChange(id, cellIndex, value, td){
+  const map = {1:'name',2:'milestone',3:'lo',4:'lo2',5:'sm',6:'agent',7:'type',8:'amount',9:'program',10:'coe',11:'closed',12:'appraisal',13:'cd'};
+  const field = map[cellIndex];
+  if(!field) return;
+  const obj = customers.find(c=>c.id===id);
+  if(!obj) return;
+  if(field==='amount'){
+    const num = parseFloat(String(value).replace(/[^0-9.-]/g,'')) || 0;
+    obj.amount = num;
+    td.innerText = `$${num.toLocaleString()}`;
+  } else if(field==='coe' || field==='closed'){
+    obj[field] = value;
+    td.innerText = formatDate(value);
+  } else {
+    obj[field] = value;
+  }
+}
+
+/* ----------- Charts ----------- */
+const green="#28a745",gray="#e0e0e0";
+let charts=[];
+function updateCharts(){
+  charts.forEach(c=>c.destroy());
+  charts=[];
+  const escrowData=customers.filter(c=>c.status==="Escrow");
+  const totalUnits=escrowData.length;
+  const totalVolume=escrowData.reduce((a,b)=>a+b.amount,0);
+  const totalComms=(totalVolume*0.02).toFixed(0);
+  const typeCounts=countBy(escrowData,"type");
+  const programCounts=countBy(escrowData,"program");
+  const milestoneCounts=countBy(escrowData,"milestone");
+  const pieColors=["#2563eb","#f59e0b","#10b981","#ef4444","#8b5cf6","#06b6d4","#f97316","#22c55e"]; // distinct hues
+
+  charts.push(new Chart(document.getElementById("chartUnits"),{type:'bar',data:{labels:["Units"],datasets:[{data:[totalUnits],backgroundColor:green,borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:gray}}}}}));
+  charts.push(new Chart(document.getElementById("chartVolume"),{type:'bar',data:{labels:["Volume"],datasets:[{data:[totalVolume/1000],backgroundColor:green,borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:gray}}}}}));
+  charts.push(new Chart(document.getElementById("chartComms"),{type:'bar',data:{labels:["Commissions"],datasets:[{data:[totalComms/1000],backgroundColor:green,borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:gray}}}}}));
+  charts.push(new Chart(document.getElementById("chartType"),{
+    type:'pie',
+    data:{
+      labels:Object.keys(typeCounts),
+      datasets:[{data:Object.values(typeCounts),backgroundColor:pieColors}]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      plugins:{
+        legend:{position:'bottom', labels:{usePointStyle:true, pointStyle:'circle'}}
+      },
+      layout:{padding:{bottom:12}}
+    }
+  }));
+  charts.push(new Chart(document.getElementById("chartProgram"),{
+    type:'pie',
+    data:{
+      labels:Object.keys(programCounts),
+      datasets:[{data:Object.values(programCounts),backgroundColor:pieColors}]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      plugins:{
+        legend:{position:'bottom', labels:{usePointStyle:true, pointStyle:'circle'}}
+      },
+      layout:{padding:{bottom:12}}
+    }
+  }));
+  charts.push(new Chart(document.getElementById("chartMilestone"),{type:'bar',data:{labels:Object.keys(milestoneCounts),datasets:[{data:Object.values(milestoneCounts),backgroundColor:green,borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:gray}}}}}));
+}
+function countBy(arr,key){return arr.reduce((acc,obj)=>{acc[obj[key]]=(acc[obj[key]]||0)+1;return acc;},{});}
+
+/* ----------- Navigation ----------- */
+function goHome() { 
+  // Clear all bottom nav active states and show dashboard
+  document.querySelectorAll('.bottom-nav a').forEach(a=>a.classList.remove('active'));
+  document.getElementById('dashboardPage').classList.remove('d-none');
+  document.getElementById('customersPage').classList.add('d-none');
+  document.getElementById('adminPage').classList.add('d-none');
+  updateCharts();
+}
+
+function toggleSidebar() {
+  // Placeholder for sidebar functionality
+  alert("Sidebar menu coming soon!");
+}
+
+function toggleSearch() {
+  const searchOverlay = document.getElementById('searchOverlay');
+  if (searchOverlay) {
+    searchOverlay.classList.toggle('show');
+  }
+}
+
+function toggleAIUS(show) {
+  const overlay = document.getElementById("aiusOverlay");
+  const panel = document.getElementById("aiusPanel");
+  if (show) {
+    overlay.classList.add("show");
+    panel.classList.add("active");
+  } else {
+    overlay.classList.remove("show");
+    panel.classList.remove("active");
+  }
+}
+
+function closeAIUS() {
+  toggleAIUS(false);
+}
+
+function sendMessage() {
+  const input = document.getElementById("aiusInput");
+  const chat = document.getElementById("aiusChat");
+  if (input.value.trim()) {
+    chat.insertAdjacentHTML("beforeend", `<div class="chat-message user"><div class="chat-bubble">${input.value}</div></div>`);
+    input.value = "";
+    scrollChat();
+    setTimeout(() => {
+      chat.insertAdjacentHTML("beforeend", `<div class="chat-message ai"><div class="chat-bubble">I'm here to help with your loan management needs. How can I assist you today?</div></div>`);
+      scrollChat();
+    }, 600);
+  }
+}
+
+function handleKeyPress(e) {
+  if (e.key === "Enter") sendMessage();
+}
+
+function scrollChat() {
+  const chat = document.getElementById("aiusChat");
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function performSearch() {
+  const searchTerm = document.getElementById("searchInput").value.toLowerCase();
+  if (searchTerm.trim()) {
+    // Filter customers based on search term
+    const filteredCustomers = customers.filter(c => 
+      c.name.toLowerCase().includes(searchTerm) ||
+      c.loanNumber?.toLowerCase().includes(searchTerm) ||
+      c.status.toLowerCase().includes(searchTerm)
+    );
+    
+    if (filteredCustomers.length > 0) {
+      alert(`Found ${filteredCustomers.length} customers matching "${searchTerm}"`);
+    } else {
+      alert(`No customers found matching "${searchTerm}"`);
+    }
+    
+    toggleSearch(); // Close search overlay
+  }
+}
+
+window.onload=()=>{
+  updateCharts();
+  // Default states are controlled by .page.active wrappers now
+};
+
+// Generic bottom-nav page swapping for .page wrappers
+const navButtons = document.querySelectorAll('.nav-btn');
+const pages = document.querySelectorAll('.page');
+
+navButtons.forEach(btn => {
+  btn.addEventListener('click', () => {
+    // Remove active states
+    navButtons.forEach(b => b.classList.remove('active'));
+    pages.forEach(p => p.classList.remove('active'));
+
+    // Add active state to clicked button
+    btn.classList.add('active');
+
+    // Determine target page
+    if (btn.id === 'nav-dashboard') {
+      document.getElementById('page-dashboard').classList.add('active');
+      // Optional: ensure charts are visible and updated
+      updateCharts();
+    } else if (btn.id === 'nav-pipeline') {
+      document.getElementById('page-pipeline').classList.add('active');
+      // Ensure pipeline tabs have a default selection
+      activatePipelineTab('Prospects');
+      showCustomers('Lead');
+    } else if (btn.id === 'nav-aius') {
+      document.getElementById('page-aius').classList.add('active');
+      // Optionally open the AI panel too
+      // toggleAIUS(true);
+    }
+  });
+});
+</script>
+
+<!-- Search Overlay -->
+<div id="searchOverlay" class="search-overlay">
+  <div class="search-container">
+    <div class="search-header">
+      <h6>Search Customers</h6>
+      <i class="bi bi-x-lg" onclick="toggleSearch()"></i>
+    </div>
+    <div class="search-body">
+      <input type="text" id="searchInput" class="form-control" placeholder="Search by name, loan number, or status..." onkeypress="if(event.key==='Enter') performSearch()">
+      <button class="btn btn-primary mt-2" onclick="performSearch()">Search</button>
+    </div>
+  </div>
+</div>
+
+<!-- AIUS Overlay -->
+<div id="aiusOverlay" class="aius-overlay" onclick="closeAIUS()"></div>
+
+<!-- AIUS Panel -->
+<div id="aiusPanel" class="aius-panel">
+  <div class="aius-header">
+    <span>AI Assistant</span>
+    <i class="bi bi-x-lg" onclick="closeAIUS()"></i>
+  </div>
+  <div id="aiusChat" class="aius-chat">
+    <div class="chat-message ai">
+      <div class="chat-bubble">Hello! I'm your AI Assistant. How can I help you with your loan management today?</div>
+    </div>
+  </div>
+  <div class="aius-input">
+    <input type="text" id="aiusInput" placeholder="Type your message..." onkeypress="handleKeyPress(event)">
+    <button class="btn-send" onclick="sendMessage()">
+      <i class="bi bi-send"></i>
+    </button>
+  </div>
+</div>
+
+</body>
+</html>

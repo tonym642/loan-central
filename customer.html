@@ -1,0 +1,1439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Loan Central</title>
+<link rel="icon" type="image/png" href="assets/img/favicon.png" />
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet" />
+
+<style>
+      /* Add borders to all fields on the page */
+      input.form-control, select.form-select, textarea.form-control {
+        border: 1.5px solid #e5e7eb !important;
+        box-shadow: none !important;
+        background: #fff;
+      }
+      input.form-control:focus, select.form-select:focus, textarea.form-control:focus {
+        border: 2px solid #28a745 !important;
+        box-shadow: none !important;
+      }
+      /* Summary A fields: border only on entry fields, not labels */
+      .summary-card .summary-field {
+        border: 1.5px solid #e5e7eb !important;
+        box-shadow: none !important;
+        background: #fff;
+        text-align: right;
+      }
+      .summary-card .summary-field:focus {
+        border: 2px solid #28a745 !important;
+        box-shadow: none !important;
+        text-align: right;
+      }
+      /* Remove borders from summary card fields */
+      .summary-card .form-control,
+      .summary-card .form-select,
+      .summary-card textarea.form-control {
+        border: none !important;
+        box-shadow: none !important;
+        background: #fff;
+      }
+      .summary-card .form-control:focus,
+      .summary-card .form-select:focus,
+      .summary-card textarea.form-control:focus {
+        border: none !important;
+        box-shadow: none !important;
+      }
+/* Match summary card height for filter, checklist, and table containers */
+.filter, .checklist, .conditions-table-container {
+  min-height: calc(100vh - 210px) !important;
+  max-height: calc(100vh - 210px) !important;
+  padding-bottom: 16px !important;
+}
+
+/* Match summary, financials, and notes card height to conditions/tasks */
+.summary-section, .summary-grid .card,
+.financials-section, .financials-grid .fin-box,
+.notes-section, .notes-grid .note-list, .notes-grid .note-view {
+  min-height: calc(100vh - 210px) !important;
+  max-height: calc(100vh - 210px) !important;
+  padding-bottom: 16px !important;
+}
+
+/* Custom green for pagination and checkboxes */
+.pagination .page-link, .pagination .page-item.active .page-link {
+  color: #28a745;
+  border-color: #28a745;
+  background-color: #fff;
+}
+.pagination .page-item.active .page-link {
+  background-color: #28a745;
+  color: #fff;
+  border-color: #28a745;
+}
+.pagination .page-link:focus, .pagination .page-link:hover {
+  color: #218838;
+  background-color: #e8f5e8;
+  border-color: #28a745;
+}
+.table-footer {
+  border-top:1px solid #e5e7eb;
+  padding:12px 16px;
+  background:#fff;
+  text-align:right;
+}
+.table-footer .pagination {
+  justify-content: flex-end !important;
+  margin-bottom: 0;
+}
+.pagination {
+  font-size: 0.85rem;
+}
+.pagination .page-link {
+  padding: 2px 10px;
+  min-width: 32px;
+}
+.conditions-table input[type="checkbox"],
+.task-item input[type="checkbox"],
+input[type="checkbox"] {
+  accent-color: #28a745 !important;
+}
+body{font-family:'Poppins',sans-serif;background:#f8f9fa;margin:0;overflow-x:hidden;}
+/* HEADER */
+.header-bar {
+  background: #fff;
+  border-bottom: 1px solid #e0e0e0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  padding: .6rem 1rem .4rem 1rem;
+}
+.icon-btn {
+  color: #555;
+  font-size: 1.3rem;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.icon-btn:hover { color: #28a745; }
+.app-title {
+  font-weight: 600;
+  color: #333;
+  font-size: 1rem;
+}
+.customer-name{font-weight:500;font-size:1rem;color:#555;margin:0;padding-left:0.5rem;text-align:left;}
+
+
+/* LAYOUT */
+.content{padding:1rem;padding-bottom:90px;height:calc(100vh - 150px);overflow-y:hidden;}
+.card{border:1px solid #e9ecef;border-radius:6px;box-shadow:0 2px 6px rgba(0,0,0,.05);height:100%;}
+.split2{display:grid;grid-template-columns:360px 1fr;gap:1.5rem;align-items:stretch;}
+.split3{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1.5rem;align-items:stretch;}
+.tab-content{height:100%;}
+.summary-section{height:100%;}
+.summary-grid{height:100%;display:grid;grid-template-columns:repeat(4,1fr);gap:1.5rem;align-items:stretch;}
+.summary-grid .card{display:flex;flex-direction:column;}
+.notes-section{height:100%;}
+.notes-grid{height:100%;}
+.financials-section{height:100%;}
+.financials-grid{height:100%;}
+.split-conditions{display:grid;grid-template-columns:360px 1fr;gap:1.5rem;align-items:stretch;height:100%;}
+.conditions-table-container{border:none;border-radius:0;overflow:hidden;background:#fff;height:100%;min-height:calc(100vh - 150px);display:flex;flex-direction:column;}
+.filter,.checklist{height:100%;min-height:calc(100vh - 150px);display:flex;flex-direction:column;}
+.conditions-table{width:100%;border-collapse:collapse;margin:0;table-layout:auto;background:#fff;border-radius:6px;overflow:hidden;}
+.conditions-table th{background:#28a745;color:#fff;border:none;border-bottom:1px solid #28a745;padding:12px 16px;font-weight:500;font-size:13px;text-align:center;vertical-align:middle;white-space:nowrap;}
+.conditions-table th:nth-child(5){text-align:left;}
+.conditions-table td{border:none;border-bottom:1px solid #e5e7eb;padding:12px 16px;font-size:13px;font-weight:400;color:#212529;text-align:center;vertical-align:middle;cursor:pointer;}
+.conditions-table td:nth-child(5){text-align:left;font-weight:500;}
+.conditions-table tbody tr:hover{background:#f8f9fa;}
+.conditions-table tbody tr.selected{background:#e8f5e8;}
+.conditions-table tbody tr:last-child td{border-bottom:none;}
+.conditions-table th:first-child{border-left:none;}
+.conditions-table th:last-child{border-right:none;}
+.conditions-table td:first-child{border-left:none;}
+.conditions-table td:last-child{border-right:none;}
+.conditions-table th:nth-child(1), .conditions-table td:nth-child(1){width:50px;}
+.conditions-table th:nth-child(2), .conditions-table td:nth-child(2){width:40px;}
+.conditions-table th:nth-child(3), .conditions-table td:nth-child(3){width:40px;}
+.conditions-table th:nth-child(4), .conditions-table td:nth-child(4){width:70px;}
+.conditions-table th:nth-child(5), .conditions-table td:nth-child(5){width:auto;}
+.conditions-table th:nth-child(6), .conditions-table td:nth-child(6){width:80px;}
+.edit-btn{font-size:16px;cursor:pointer;color:#6c757d;transition:color 0.2s;}
+.edit-btn:hover{color:#28a745;}
+/* Star styling */
+.edit-btn.bi-star{
+  color: #6c757d !important;
+}
+.edit-btn.bi-star-fill{
+  color: #28a745 !important;
+}
+.condition-edit-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.45);
+display:none;z-index:200;opacity:0;transition:opacity .3s ease;}
+.condition-edit-overlay.show{display:block;opacity:1;}
+.condition-edit-panel{position:fixed;top:0;right:-400px;width:380px;height:100%;background:#fff;
+box-shadow:-4px 0 10px rgba(0,0,0,.25);display:flex;flex-direction:column;
+border-top-left-radius:6px;border-bottom-left-radius:6px;transition:right .35s ease;z-index:201;
+padding:1rem;overflow-y:auto;}
+.condition-edit-panel.show{right:0;}
+.filter{background:#fff;border:1px solid #e9ecef;border-radius:6px;padding:1rem;box-shadow:0 1px 3px rgba(0,0,0,.05);height:100%;}
+.checklist{background:#fff;border:1px solid #e9ecef;border-radius:6px;padding:0;box-shadow:0 1px 3px rgba(0,0,0,.05);height:100%;overflow:hidden;}
+.filter .mb-2{margin-bottom:1.5rem!important;}
+.checklist-section{margin-bottom:1.5rem;}
+.checklist-section h6{font-weight:600;font-size:.95rem;margin-bottom:.5rem;color:#28a745;}
+.task-item{display:flex;align-items:center;gap:.6rem;margin-bottom:.35rem;}
+.task-item input[type=checkbox]{width:18px;height:18px;cursor:pointer;accent-color:#28a745;}
+.task-item label{font-size:.9rem;color:#333;cursor:pointer;}
+.btn-outline-success.active{background:#28a745;color:#fff;border-color:#28a745;}
+/* FINANCIALS */
+.fin-cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1.5rem;align-items:stretch;}
+.financials-grid{height:100%;display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;align-items:stretch;}
+.fin-box{background:#fff;border:1px solid #e9ecef;border-radius:6px;padding:1rem;box-shadow:0 1px 3px rgba(0,0,0,.05);height:100%;display:flex;flex-direction:column;}
+.fin-box h6{font-weight:600;font-size:.95rem;color:#28a745;margin-bottom:.75rem;}
+.fin-box input{width:100%;border:1px solid #ddd;border-radius:4px;padding:.45rem .65rem;margin-bottom:.5rem;font-size:.9rem;transition:border-color 0.2s ease;}
+.fin-box input:focus{outline:none;border-color:#28a745;box-shadow:0 0 0 2px rgba(40,167,69,0.25);}
+.fin-box input:hover{border-color:#adb5bd;}
+.fin-box input[type="number"]::-webkit-outer-spin-button,
+.fin-box input[type="number"]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+.fin-box input[type="number"]{-moz-appearance:textfield;appearance:textfield;}
+/* NOTES */
+.notes-wrap{display:grid;grid-template-columns:360px 1fr;gap:1.5rem;align-items:stretch;}
+.notes-grid{height:100%;display:grid;grid-template-columns:360px 1fr;gap:1.5rem;align-items:stretch;}
+.note-list,.note-view{background:#fff;border:1px solid #e9ecef;border-radius:6px;padding:1rem;box-shadow:0 1px 3px rgba(0,0,0,.05);height:100%;display:flex;flex-direction:column;}
+.note-view{position:relative;}
+.note-view textarea{height:100%;flex:1;}
+.note-item{padding:.5rem;border-bottom:1px solid #eee;cursor:pointer;}
+.note-item:hover{background:#f8f9fa;}
+.note-item.active{background:#e9f7ef;}
+.note-view textarea{width:100%;height:300px;border:1px solid #ddd;border-radius:4px;padding:.75rem;font-size:.9rem;}
+/* AIUS PANEL */
+.aius-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.45);
+display:none;z-index:200;opacity:0;transition:opacity .3s ease;}
+.aius-overlay.show{display:block;opacity:1;}
+.aius-panel{position:fixed;top:0;right:-400px;width:380px;height:100%;background:#fff;
+box-shadow:-4px 0 10px rgba(0,0,0,.25);display:flex;flex-direction:column;
+border-top-left-radius:6px;border-bottom-left-radius:6px;transition:right .35s ease;z-index:201;}
+.aius-panel.active{right:0;}
+.aius-header{position:fixed;top:0;width:380px;display:flex;justify-content:space-between;align-items:center;
+padding:1rem;border-bottom:1px solid #e0e0e0;background:#28a745;color:#fff;border-top-left-radius:6px;
+z-index:202;box-shadow:0 2px 4px rgba(0,0,0,0.1);}
+.aius-chat{flex:1;margin-top:60px;margin-bottom:70px;padding:1rem;overflow-y:auto;}
+.chat-message{margin-bottom:1rem;display:flex;}
+.chat-message.user{justify-content:flex-end;}
+.chat-bubble{max-width:80%;padding:.6rem .9rem;border-radius:12px;font-size:.9rem;line-height:1.4;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.05);}
+.aius-input{position:fixed;bottom:0;width:380px;padding:.5rem;border-top:1px solid #e0e0e0;
+display:flex;align-items:center;gap:.4rem;background:#fff;box-shadow:0 -2px 5px rgba(0,0,0,0.08);z-index:202;}
+.icon-circle{width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:50%;
+background:#f1f3f5;color:#555;cursor:pointer;transition:background .2s;}
+.icon-circle:hover{background:#e9ecef;}
+.aius-input input{flex:1;border:1px solid #ddd;border-radius:30px;padding:.4rem .8rem;font-size:.9rem;outline:none;}
+.btn-send{width:36px;height:36px;border:none;border-radius:50%;background:#28a745;color:#fff;
+display:flex;align-items:center;justify-content:center;font-size:1.1rem;cursor:pointer;}
+.btn-send:hover{background:#218838;}
+.condition-edit-panel h6{color:#28a745;margin-bottom:1rem;font-weight:600;}
+.condition-edit-panel .form-group{margin-bottom:1rem;}
+.condition-edit-panel label{font-weight:500;font-size:0.9rem;color:#555;margin-bottom:0.25rem;display:block;}
+.condition-edit-panel input, .condition-edit-panel select, .condition-edit-panel textarea{width:100%;border:1px solid #ddd;border-radius:4px;padding:0.5rem;font-size:0.9rem;}
+.condition-edit-panel textarea{height:80px;resize:vertical;}
+.condition-edit-buttons{display:flex;gap:0.5rem;margin-top:1rem;}
+.toggle-switch{display:flex;align-items:center;gap:10px;margin-bottom:1rem;}
+.toggle-switch-control{position:relative;width:50px;height:24px;}
+.toggle-switch-input{opacity:0;width:0;height:0;}
+.toggle-switch-slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background-color:#ccc;
+transition:.4s;border-radius:24px;}
+.toggle-switch-slider:before{position:absolute;content:"";height:18px;width:18px;left:3px;bottom:3px;
+background-color:white;transition:.4s;border-radius:50%;}
+.toggle-switch-input:checked + .toggle-switch-slider{background-color:#28a745;}
+.toggle-switch-input:checked + .toggle-switch-slider:before{transform:translateX(26px);}
+.toggle-switch-labels{display:flex;align-items:center;gap:8px;font-size:0.85rem;color:#666;}
+
+/* BOTTOM NAVIGATION */
+.bottom-nav{
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  background:#fff;
+  border-top:1px solid #e0e0e0;
+  display:flex;
+  justify-content:space-around;
+  align-items:center;
+  padding:0.3rem 0;
+  z-index:200;
+  box-shadow:0 -1px 4px rgba(0,0,0,0.08);
+}
+.bottom-nav .nav-item{
+  color:#555;
+  text-align:center;
+  font-size:0.8rem;
+  text-decoration:none;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:0.25rem;
+  transition:color 0.2s;
+}
+.bottom-nav .nav-item.active,
+.bottom-nav .nav-item:hover{
+  color:#28a745;
+}
+.bottom-nav .nav-item i{
+  display:block;
+  font-size:1.2rem;
+  margin-bottom:0.2rem;
+}
+.bottom-nav .nav-item span{
+  font-size:0.75rem;
+}
+
+@media(max-width:768px){
+.split2,.notes-wrap,.split-conditions{grid-template-columns:1fr;}
+.summary-grid{grid-template-columns:1fr 1fr;gap:1rem;}
+.notes-grid{grid-template-columns:1fr;gap:1rem;}
+.financials-grid{grid-template-columns:1fr;gap:1rem;}
+.condition-edit-panel{width:100%;right:-100%;}
+.condition-edit-panel.show{right:0;}
+.aius-panel{width:100%;right:-100%;}.aius-panel.active{right:0;}
+.aius-header,.aius-input{width:100%;}
+.icon-circle{width:28px;height:28px;}
+.conditions-table{font-size:13px;}
+.conditions-table th, .conditions-table td{padding:8px 10px;}
+.edit-btn{font-size:14px;}
+.filter .mb-2{margin-bottom:1rem!important;}
+.content{height:calc(100vh - 150px);padding-bottom:100px;}
+.bottom-nav .nav-item{font-size:0.7rem;padding:0.2rem;}
+.bottom-nav .nav-item i{font-size:1rem;}
+.bottom-nav .nav-item span{font-size:0.65rem;}
+}
+</style>
+</head>
+
+<body>
+<header class="header-bar">
+  <div class="d-flex align-items-center justify-content-between">
+    <div class="d-flex align-items-center gap-2">
+      <i class="bi bi-house icon-btn" onclick="goHome()" title="Home"></i>
+      <h6 class="app-title mb-0"><strong>Loan Central</strong></h6>
+    </div>
+    <i class="bi bi-robot icon-btn" onclick="toggleAIUS(true)" title="AI Assistant"></i>
+  </div>
+  <div class="d-flex align-items-center justify-content-start gap-4 mt-2 pt-2" style="font-size: 0.85rem;">
+    <span><strong>BO:</strong> <span class="customer-name" id="customerName"><strong>Customer Name</strong></span></span>
+    <span><strong>LO:</strong> <span id="customerLO">--</span></span>
+    <span><strong>BA:</strong> <span id="customerBA">--</span></span>
+    <span><strong>COE:</strong> <span id="customerCOE">--</span></span>
+  </div>
+</header>
+
+<!-- Bottom Navigation -->
+
+<!-- CONTENT -->
+<main class="content">
+  <!-- SUMMARY -->
+  <section id="summary" class="tab-content summary-section">
+  <div class="page-content px-4 pb-3" style="padding-top:0;">
+    <div class="row summary-grid g-4" style="min-height:500px;margin-top:0;margin-bottom:48px;">
+        <div class="col-lg-4 mb-4">
+          <div class="card summary-card">
+            <div class="d-flex align-items-center justify-content-between mb-3" style="cursor:pointer;" data-bs-toggle="collapse" data-bs-target="#summaryASection" aria-expanded="true" aria-controls="summaryASection">
+              <h6 class="text-success fw-bold mb-0">Summary A</h6>
+              <i class="bi bi-chevron-down" id="summaryAArrow"></i>
+            </div>
+            <div class="collapse show" id="summaryASection">
+              <form>
+                <div class="row g-2 align-items-center mb-2">
+                  <div class="col-5 text-start pe-0"><label class="fw-normal">Customer Name</label></div>
+                  <div class="col-7 ps-0"><input type="text" class="form-control summary-field" placeholder="" data-bs-toggle="tooltip" title="customer_name"></div>
+                </div>
+                <div class="row g-2 align-items-center mb-2">
+                  <div class="col-5 text-start pe-0"><label class="fw-normal">Subject Line</label></div>
+                  <div class="col-7 ps-0"><input type="text" class="form-control summary-field" placeholder="" data-bs-toggle="tooltip" title="subject_line"></div>
+                </div>
+                <div class="row g-2 align-items-center mb-2">
+                  <div class="col-5 text-start pe-0"><label class="fw-normal">Credit Report Number</label></div>
+                  <div class="col-7 ps-0"><input type="text" class="form-control summary-field" placeholder="" data-bs-toggle="tooltip" title="credit_report_number"></div>
+                </div>
+                <div class="row g-2 align-items-center mb-2">
+                  <div class="col-5 text-start pe-0"><label class="fw-normal">Credit Report Exp</label></div>
+                  <div class="col-7 ps-0"><input type="date" class="form-control summary-field" placeholder="" data-bs-toggle="tooltip" title="credit_report_exp"></div>
+                </div>
+                <div class="row g-2 align-items-center mb-2">
+                  <div class="col-5 text-start pe-0"><label class="fw-normal">APN</label></div>
+                  <div class="col-7 ps-0"><input type="text" class="form-control summary-field" placeholder="" data-bs-toggle="tooltip" title="apn"></div>
+                </div>
+                <div class="row g-2 align-items-center mb-2">
+                  <div class="col-5 text-start pe-0"><label class="fw-normal">Solar Panels</label></div>
+                  <div class="col-7 ps-0"><input type="text" class="form-control summary-field" placeholder="" data-bs-toggle="tooltip" title="solar_panels"></div>
+                </div>
+                <div class="row g-2 align-items-center mb-2">
+                  <div class="col-5 text-start pe-0"><label class="fw-normal">HOA</label></div>
+                  <div class="col-7 ps-0"><input type="text" class="form-control summary-field" placeholder="" data-bs-toggle="tooltip" title="hoa"></div>
+                </div>
+                <div class="row g-2 align-items-center mb-2">
+                  <div class="col-5 text-start pe-0"><label class="fw-normal">SID/LIDS</label></div>
+                  <div class="col-7 ps-0"><input type="text" class="form-control summary-field" placeholder="" data-bs-toggle="tooltip" title="sid_lids"></div>
+                </div>
+                <div class="row g-2 align-items-center mb-2">
+                  <div class="col-5 text-start pe-0"><label class="fw-normal">Insurance Selection</label></div>
+                  <div class="col-7 ps-0"><input type="text" class="form-control summary-field" placeholder="" data-bs-toggle="tooltip" title="insurance_selection"></div>
+                </div>
+                <div class="row g-2 align-items-center mb-2">
+                  <div class="col-5 text-start pe-0"><label class="fw-normal">Contract Date</label></div>
+                  <div class="col-7 ps-0"><input type="date" class="form-control summary-field" placeholder="" data-bs-toggle="tooltip" title="contract_date"></div>
+                </div>
+                <div class="row g-2 align-items-center mb-2">
+                  <div class="col-5 text-start pe-0"><label class="fw-normal">Appraisal</label></div>
+                  <div class="col-7 ps-0"><input type="text" class="form-control summary-field" placeholder="" data-bs-toggle="tooltip" title="appraisal"></div>
+                </div>
+                <div class="row g-2 align-items-center mb-2">
+                  <div class="col-5 text-start pe-0"><label class="fw-normal">Approval</label></div>
+                  <div class="col-7 ps-0"><input type="text" class="form-control summary-field" placeholder="" data-bs-toggle="tooltip" title="approval"></div>
+                </div>
+                <div class="row g-2 align-items-center mb-2">
+                  <div class="col-5 text-start pe-0"><label class="fw-normal">COE</label></div>
+                  <div class="col-7 ps-0"><input type="date" class="form-control summary-field" placeholder="" data-bs-toggle="tooltip" title="coe"></div>
+                </div>
+                <div class="row g-2 align-items-center mb-2">
+                  <div class="col-5 text-start pe-0"><label class="fw-normal">Email Sets</label></div>
+                  <div class="col-7 ps-0"><input type="text" class="form-control summary-field" placeholder="" data-bs-toggle="tooltip" title="email_sets"></div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+        <div class="col-12 col-lg-4">
+          <div class="card summary-card">
+            <div class="d-flex align-items-center justify-content-between mb-3" style="cursor:pointer;" data-bs-toggle="collapse" data-bs-target="#borrowerSection" aria-expanded="true" aria-controls="borrowerSection">
+              <h6 class="text-success fw-bold mb-0">Borrower</h6>
+              <i class="bi bi-chevron-down" id="borrowerArrow"></i>
+            </div>
+            <div class="collapse" id="borrowerSection">
+              <div class="form-group"><input type="text" class="form-control" placeholder="Borrower Cell" data-bs-toggle="tooltip" title="borrower_cell"></div>
+              <div class="form-group"><input type="email" class="form-control" placeholder="Borrower Email" data-bs-toggle="tooltip" title="borrower_email"></div>
+              <div class="form-group"><input type="text" class="form-control" placeholder="Borrower Language" data-bs-toggle="tooltip" title="borrower_language"></div>
+              <div class="form-group"><input type="text" class="form-control" placeholder="Borrower Misc" data-bs-toggle="tooltip" title="borrower_misc"></div>
+            </div>
+            <div class="d-flex align-items-center justify-content-between mb-3" style="cursor:pointer;" data-bs-toggle="collapse" data-bs-target="#coBorrowerSection" aria-expanded="true" aria-controls="coBorrowerSection">
+              <h6 class="text-success fw-bold mb-0">Co-Borrower</h6>
+              <i class="bi bi-chevron-down" id="coBorrowerArrow"></i>
+            </div>
+            <div class="collapse" id="coBorrowerSection">
+              <div class="form-group"><input type="text" class="form-control" placeholder="Co-Borrower Name" data-bs-toggle="tooltip" title="coborrower_name"></div>
+              <div class="form-group"><input type="text" class="form-control" placeholder="Co-Borrower Cell" data-bs-toggle="tooltip" title="coborrower_cell"></div>
+              <div class="form-group"><input type="email" class="form-control" placeholder="Co-Borrower Email" data-bs-toggle="tooltip" title="coborrower_email"></div>
+            </div>
+            <!-- ...existing code for agent and escrow fields... -->
+            <div class="d-flex align-items-center justify-content-between mb-3" style="cursor:pointer;" data-bs-toggle="collapse" data-bs-target="#buyerAgentSection" aria-expanded="true" aria-controls="buyerAgentSection">
+              <h6 class="text-success fw-bold mb-0">Buyer Agent</h6>
+              <i class="bi bi-chevron-down" id="buyerAgentArrow"></i>
+            </div>
+            <div class="collapse" id="buyerAgentSection">
+              <div class="form-group"><input type="text" class="form-control" placeholder="Buyer Agent Name" data-bs-toggle="tooltip" title="buyer_agent_name"></div>
+              <div class="form-group"><input type="text" class="form-control" placeholder="Buyer Agent Phone" data-bs-toggle="tooltip" title="buyer_agent_phone"></div>
+              <div class="form-group"><input type="email" class="form-control" placeholder="Buyer Agent Email" data-bs-toggle="tooltip" title="buyer_agent_email"></div>
+              <div class="form-group"><input type="text" class="form-control" placeholder="Buyer Agent Assistant" data-bs-toggle="tooltip" title="buyer_agent_assistant"></div>
+              <div class="form-group"><input type="email" class="form-control" placeholder="Buyer Agent Assistant Email" data-bs-toggle="tooltip" title="buyer_agent_assistant_email"></div>
+            </div>
+            <div class="d-flex align-items-center justify-content-between mb-3" style="cursor:pointer;" data-bs-toggle="collapse" data-bs-target="#listingAgentSection" aria-expanded="true" aria-controls="listingAgentSection">
+              <h6 class="text-success fw-bold mb-0">Listing Agent</h6>
+              <i class="bi bi-chevron-down" id="listingAgentArrow"></i>
+            </div>
+            <div class="collapse" id="listingAgentSection">
+              <div class="form-group"><input type="text" class="form-control" placeholder="Listing Agent Name" data-bs-toggle="tooltip" title="listing_agent_name"></div>
+              <div class="form-group"><input type="text" class="form-control" placeholder="Listing Agent Phone" data-bs-toggle="tooltip" title="listing_agent_phone"></div>
+              <div class="form-group"><input type="email" class="form-control" placeholder="Listing Agent Email" data-bs-toggle="tooltip" title="listing_agent_email"></div>
+              <div class="form-group"><input type="text" class="form-control" placeholder="Listing Agent Assistant" data-bs-toggle="tooltip" title="listing_agent_assistant"></div>
+              <div class="form-group"><input type="email" class="form-control" placeholder="Listing Agent Assistant Email" data-bs-toggle="tooltip" title="listing_agent_assistant_email"></div>
+            </div>
+            <div class="d-flex align-items-center justify-content-between mb-3" style="cursor:pointer;" data-bs-toggle="collapse" data-bs-target="#escrowSection" aria-expanded="true" aria-controls="escrowSection">
+              <h6 class="text-success fw-bold mb-0">Title & Escrow</h6>
+              <i class="bi bi-chevron-down" id="escrowArrow"></i>
+            </div>
+            <div class="collapse" id="escrowSection">
+              <div class="form-group"><input type="text" class="form-control" placeholder="Title Company" data-bs-toggle="tooltip" title="title_company"></div>
+              <div class="form-group"><input type="text" class="form-control" placeholder="Escrow Officer" data-bs-toggle="tooltip" title="escrow_officer"></div>
+              <div class="form-group"><input type="text" class="form-control" placeholder="Escrow Phone" data-bs-toggle="tooltip" title="escrow_phone"></div>
+              <div class="form-group"><input type="email" class="form-control" placeholder="Escrow Email" data-bs-toggle="tooltip" title="escrow_email"></div>
+              <div class="form-group"><input type="text" class="form-control" placeholder="Escrow Assistant" data-bs-toggle="tooltip" title="escrow_assistant"></div>
+            </div>
+          </div>
+        </div>
+        <div class="col-12 col-lg-4">
+          <div class="card summary-card">
+            <h6 class="text-success fw-bold mb-3 text-start">Summary C</h6>
+            <form>
+              <div class="row g-2 align-items-center mb-2">
+                <div class="col-5 text-start pe-0"><label class="fw-normal">Milestone</label></div>
+                <div class="col-7 ps-0">
+                  <select class="form-select summary-field" data-bs-toggle="tooltip" title="milestone" style="text-align:right;">
+                    <option value="">Milestone</option>
+                    <option>Lead</option>
+                    <option>Processing</option>
+                    <option>Underwriting</option>
+                    <option>Escrow</option>
+                    <option>Funded</option>
+                    <option>Closed</option>
+                  </select>
+                </div>
+              </div>
+              <!-- Move Critical Notes to last -->
+              <div class="row g-2 align-items-center mb-2">
+                <div class="col-5 text-start pe-0"><label class="fw-normal">Appraisal Due Date</label></div>
+                <div class="col-7 ps-0"><input type="date" class="form-control summary-field" placeholder="" data-bs-toggle="tooltip" title="appraisal_due_date"></div>
+              </div>
+              <div class="row g-2 align-items-center mb-2">
+                <div class="col-5 text-start pe-0"><label class="fw-normal">Appraisal Value</label></div>
+                <div class="col-7 ps-0"><input type="text" class="form-control summary-field" placeholder="" data-bs-toggle="tooltip" title="appraisal_value"></div>
+              </div>
+              <div class="row g-2 align-items-center mb-2">
+                <div class="col-5 text-start pe-0"><label class="fw-normal">Appraisal Repairs</label></div>
+                <div class="col-7 ps-0"><input type="text" class="form-control summary-field" placeholder="" data-bs-toggle="tooltip" title="appraisal_repairs"></div>
+              </div>
+              <div class="row g-2 align-items-center mb-2">
+                <div class="col-5 text-start pe-0"><label class="fw-normal">Appraisal Status</label></div>
+                <div class="col-7 ps-0"><input type="text" class="form-control summary-field" placeholder="" data-bs-toggle="tooltip" title="appraisal_status"></div>
+              </div>
+              <div class="row g-2 align-items-center mb-2">
+                <div class="col-5 text-start pe-0"><label class="fw-normal">CD Status</label></div>
+                <div class="col-7 ps-0"><input type="text" class="form-control summary-field" placeholder="" data-bs-toggle="tooltip" title="cd_status"></div>
+              </div>
+              <div class="row g-2 align-items-center mb-2">
+                <div class="col-5 text-start pe-0"><label class="fw-normal">Critical Notes</label></div>
+                <div class="col-7 ps-0">
+                  <textarea class="form-control summary-field" rows="2" placeholder="" data-bs-toggle="tooltip" title="critical_notes" style="text-align:right;"></textarea>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      <div class="row mb-4">
+        <div class="col-lg-12 mb-4">
+          <div class="card summary-card text-center py-5">
+            <h6 class="text-success fw-bold mb-3">Milestones</h6>
+            <div class="text-muted">(Placeholder for future development)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <style>
+      .summary-grid {
+        display: flex;
+        flex-wrap: nowrap;
+        gap: 0.5rem;
+        justify-content: space-between;
+      }
+      .summary-card {
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        box-shadow: none;
+        min-width: 0;
+        width: 100%;
+        padding: 20px 16px 24px 16px;
+        background: #fff;
+      }
+      @media (max-width: 991px) {
+        .summary-grid {
+          flex-direction: column;
+          gap: 0.75rem;
+        }
+        .summary-card {
+          width: 100%;
+        }
+      }
+    </style>
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+          return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+      })
+    </script>
+  </section>
+
+  <!-- CONDITIONS -->
+  <section id="conditions" class="tab-content d-none">
+    <div class="split-conditions">
+      <div class="filter" id="condFilters"></div>
+      <div class="checklist" id="condChecklist"></div>
+    </div>
+  </section>
+
+  <!-- TASKS -->
+  <section id="tasks" class="tab-content d-none">
+    <div class="split2">
+      <div class="filter" id="taskFilters"></div>
+      <div class="checklist" id="taskChecklist"></div>
+    </div>
+  </section>
+
+  <!-- FINANCIALS -->
+  <section id="financials" class="tab-content financials-section d-none">
+    <div class="fin-cols financials-grid" id="finContainer"></div>
+  </section>
+
+  <!-- NOTES -->
+  <section id="notes" class="tab-content notes-section d-none">
+    <div class="notes-wrap notes-grid">
+      <div class="note-list" id="noteList"></div>
+      <div class="note-view">
+        <textarea id="noteView" placeholder="Select or add a note..."></textarea>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- AIUS PANEL -->
+<div class="aius-overlay" id="aiusOverlay" onclick="toggleAIUS(false)"></div>
+<div class="aius-panel" id="aiusPanel">
+  <div class="aius-header">
+    <span><i class="bi bi-robot"></i> AIUS Assistant</span>
+    <i class="bi bi-x-lg" style="cursor:pointer;" onclick="toggleAIUS(false)"></i>
+  </div>
+  <div class="aius-chat" id="aiusChat">
+    <div class="chat-message ai"><div class="chat-bubble">Hello! I'm your AIUS Assistant. How can I help with this loan file?</div></div>
+  </div>
+  <div class="aius-input">
+    <div class="icon-circle"><i class="bi bi-plus"></i></div>
+    <input id="aiusInput" type="text" placeholder="Type a message..." onkeypress="handleKeyPress(event)">
+    <div class="icon-circle"><i class="bi bi-mic"></i></div>
+    <div class="icon-circle"><i class="bi bi-soundwave"></i></div>
+    <button class="btn-send" onclick="sendMessage()"><i class="bi bi-send-fill"></i></button>
+  </div>
+</div>
+
+<!-- CONDITION EDIT PANEL -->
+<div class="condition-edit-overlay" id="conditionEditOverlay" onclick="toggleConditionEdit(false)"></div>
+<div class="condition-edit-panel" id="conditionEditPanel">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;padding-bottom:1rem;border-bottom:1px solid #e0e0e0;">
+    <h6 style="margin:0;color:#28a745;">Edit Condition</h6>
+    <i class="bi bi-x-lg" style="cursor:pointer;color:#666;" onclick="toggleConditionEdit(false)"></i>
+  </div>
+  <div class="form-group">
+    <label>Condition Description</label>
+    <textarea id="editConditionDesc" placeholder="Enter condition description..."></textarea>
+  </div>
+  <div class="form-group">
+    <label>Section</label>
+    <select id="editConditionSection">
+      <option value="Credit">Credit</option>
+      <option value="Income">Income</option>
+      <option value="Assets">Assets</option>
+      <option value="Collateral">Collateral</option>
+      <option value="Compliance">Compliance</option>
+      <option value="UW">UW</option>
+    </select>
+  </div>
+  <div class="form-group">
+    <label>Owner</label>
+    <select id="editConditionOwner">
+      <option value="BO">BO</option>
+      <option value="LO">LO</option>
+      <option value="LOA">LOA</option>
+      <option value="LP1">LP1</option>
+      <option value="LP2">LP2</option>
+      <option value="UW">UW</option>
+    </select>
+  </div>
+  <div class="form-group">
+    <label>Status</label>
+    <select id="editConditionStatus">
+      <option value="pending">Pending</option>
+      <option value="completed">Completed</option>
+    </select>
+  </div>
+  <div class="form-group">
+    <label>Due Date</label>
+    <input type="date" id="editConditionDueDate">
+  </div>
+  <div class="form-group">
+    <label>Priority</label>
+    <div>
+      <button type="button" id="priorityNo" class="btn btn-sm btn-outline-success me-1">No</button>
+      <button type="button" id="priorityYes" class="btn btn-sm btn-outline-success">Yes</button>
+    </div>
+  </div>
+  <div class="form-group">
+    <label>Coordinating</label>
+    <div>
+      <button type="button" id="coordNo" class="btn btn-sm btn-outline-success me-1">No</button>
+      <button type="button" id="coordYes" class="btn btn-sm btn-outline-success">Yes</button>
+    </div>
+  </div>
+  <div class="form-group">
+    <label>3rd Party Orders</label>
+    <div>
+      <button type="button" id="thirdPartyNo" class="btn btn-sm btn-outline-success me-1">No</button>
+      <button type="button" id="thirdPartyYes" class="btn btn-sm btn-outline-success">Yes</button>
+    </div>
+  </div>
+  <div class="condition-edit-buttons">
+    <button class="btn btn-success btn-sm" onclick="saveConditionEdit()">Save</button>
+    <button class="btn btn-secondary btn-sm" onclick="cancelConditionEdit()">Cancel</button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+/* -------------------- GLOBAL -------------------- */
+let customerName="Customer";
+let filterStatus="pending";
+let taskData={}, condData={}, finData={}, notesData={};
+const sections=["Credit","Income","Assets","Collateral","Compliance","UW"];
+const owners=["BO","LO","LOA","LP1","LP2","UW"];
+
+/* -------------------- INIT -------------------- */
+document.addEventListener("DOMContentLoaded",()=>{
+  loadCustomerName();
+  initTasksAndConditions();
+  initFinancials();
+  initNotes();
+  enableTooltips();
+});
+
+/* -------------------- HEADER -------------------- */
+function loadCustomerName(){
+  const urlParams=new URLSearchParams(window.location.search);
+  customerName=urlParams.get("name")||localStorage.getItem("customerName")||"Customer Name";
+  document.getElementById("customerName").innerText=customerName;
+  localStorage.setItem("customerName",customerName);
+  loadCustomerDetails();
+}
+
+function loadCustomerDetails(){
+  // Sample customer data - in a real app this would come from a database or API
+  const customerData = {
+    "John Doe": { lo: "Tony Medina", ba: "Tony Medina Jr", coe: "2025-10-25" },
+    "Sarah Smith": { lo: "Jane Smith", ba: "Tony Medina Jr", coe: "2025-09-10" },
+    "David Brown": { lo: "Lisa Parker", ba: "Tony Medina Jr", coe: "2025-07-14" },
+    "Emily Davis": { lo: "Tony Medina", ba: "Tony Medina Jr", coe: "2025-09-01" }
+  };
+  
+  const details = customerData[customerName] || { lo: "Tony Medina", ba: "Tony Medina Jr", coe: "TBD" };
+  
+  document.getElementById("customerLO").textContent = details.lo;
+  document.getElementById("customerBA").textContent = details.ba;
+  document.getElementById("customerCOE").textContent = formatDisplayDate(details.coe);
+}
+
+function formatDisplayDate(dateStr) {
+  if (dateStr === "TBD" || dateStr === "Pending") return dateStr;
+  try {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString("en-US");
+  } catch (e) {
+    return dateStr;
+  }
+}
+
+/* -------------------- TAB NAV -------------------- */
+function showTab(e,id){
+  e.preventDefault();
+  document.querySelectorAll(".bottom-nav .nav-item").forEach(a=>a.classList.remove("active"));
+  
+  // Find the nav-item element (either the clicked element or its parent)
+  let navItem = e.target;
+  if (!navItem.classList.contains('nav-item')) {
+    navItem = navItem.closest('.nav-item');
+  }
+  if (navItem) {
+    navItem.classList.add("active");
+  }
+  
+  document.querySelectorAll(".tab-content").forEach(t=>t.classList.add("d-none"));
+  document.getElementById(id).classList.remove("d-none");
+}
+
+/* -------------------- TASKS + CONDITIONS -------------------- */
+function initTasksAndConditions(){
+  const taskKey=`loanCentral_${customerName}_tasks`;
+  const condKey=`loanCentral_${customerName}_conditions`;
+  taskData=JSON.parse(localStorage.getItem(taskKey))||{};
+  condData=JSON.parse(localStorage.getItem(condKey))||{};
+  renderChecklist("tasks",taskData,taskKey);
+  renderChecklist("conditions",condData,condKey);
+}
+
+function renderChecklist(type,data,storageKey){
+  const filterDiv=document.getElementById(type==="tasks"?"taskFilters":"condFilters");
+  const checkDiv=document.getElementById(type==="tasks"?"taskChecklist":"condChecklist");
+
+  /* Build Filters */
+  if(type==="tasks"){
+    const milestones=[
+      "Milestone 1","Milestone 2","Milestone 3","Milestone 4","Milestone 5",
+      "Milestone 6","Milestone 7","Milestone 8","Milestone 9","Milestone 10"
+    ];
+    filterDiv.innerHTML=`
+      <h6>Filters</h6>
+      <div class="mb-2"><strong>Status</strong><br>
+        <button class="btn btn-sm btn-outline-success me-1" id="${type}PendingBtn" onclick="toggleStatusFilter('${type}','pending',this)">Pending</button>
+        <button class="btn btn-sm btn-outline-success me-1" id="${type}CompletedBtn" onclick="toggleStatusFilter('${type}','completed',this)">Completed</button>
+      </div>
+      <div class="mb-2"><strong>Milestone</strong><br>
+        <select class="form-select form-select-sm w-auto d-inline" onchange="setFilterDropdown('${type}','milestone',this)">
+          <option value="">All</option>
+          ${milestones.map(m=>`<option value='${m}'>${m}</option>`).join('')}
+        </select>
+      </div>
+      <div class="mb-2"><strong>Owner</strong><br>${owners.map(o=>`<button class="btn btn-sm btn-outline-success me-1 mb-1" onclick="setFilter('${type}','owner','${o}',this)">${o}</button>`).join('')}</div>
+    `;
+    // Add 20 sample tasks if none exist
+    if(Object.keys(data).filter(k=>k!=="filters").length===0){
+      for(let i=1;i<=20;i++){
+        const id=`Task_${i}`;
+        data[id]={
+          section:"General",
+          status:"pending",
+          owner:owners[Math.floor(Math.random()*owners.length)],
+          milestone:milestones[Math.floor(Math.random()*milestones.length)],
+          checked:false,
+          description:`Sample task ${i}`,
+          dueDate:""
+        };
+      }
+    }
+    localStorage.setItem(storageKey,JSON.stringify(data));
+  }else{
+    const thirdPartyFilter = type === "conditions" ? 
+      `<div class="mb-2"><strong>3rd Party Orders</strong><br>
+        <button class="btn btn-sm btn-outline-success me-1" onclick="setFilter('${type}','thirdParty','false',this)">No</button>
+        <button class="btn btn-sm btn-outline-success me-1" onclick="setFilter('${type}','thirdParty','true',this)">Yes</button>
+      </div>` : '';
+    filterDiv.innerHTML=`
+      <h6>Filters</h6>
+      <div class="mb-2"><strong>Section</strong><br>${sections.map(s=>`<button class="btn btn-sm btn-outline-success me-1 mb-1" onclick="setFilter('${type}','section','${s}',this)">${s}</button>`).join('')}</div>
+      <div class="mb-2"><strong>Status</strong><br>
+        <button class="btn btn-sm btn-outline-success me-1" id="${type}PendingBtn" onclick="toggleStatusFilter('${type}','pending',this)">Pending</button>
+        <button class="btn btn-sm btn-outline-success me-1" id="${type}CompletedBtn" onclick="toggleStatusFilter('${type}','completed',this)">Completed</button>
+      </div>
+      <div class="mb-2"><strong>Owner</strong><br>${owners.map(o=>`<button class="btn btn-sm btn-outline-success me-1 mb-1" onclick="setFilter('${type}','owner','${o}',this)">${o}</button>`).join('')}</div>
+      ${thirdPartyFilter}
+      <div class="mb-2"><strong>Priority</strong><br>
+        <button class="btn btn-sm btn-outline-success me-1" onclick="setFilter('${type}','priority','false',this)">No</button>
+        <button class="btn btn-sm btn-outline-success me-1" onclick="setFilter('${type}','priority','true',this)">Yes</button>
+      </div>
+      <div class="mb-2"><strong>Coordinating</strong><br>
+        <button class="btn btn-sm btn-outline-success me-1" onclick="setFilter('${type}','coord','false',this)">No</button>
+        <button class="btn btn-sm btn-outline-success me-1" onclick="setFilter('${type}','coord','true',this)">Yes</button>
+      </div>
+    `;
+  }
+
+  if(!data.filters) {
+    data.filters={section:null,status:null,owner:null,priority:null,coord:null,thirdParty:null};
+  }
+
+  /* Populate Demo Checklist */
+  if(Object.keys(data).filter(k=>k!=="filters").length===0){
+    sections.forEach(sec=>{
+      for(let i=1;i<=3;i++){
+        const id=`${sec}_Item${i}`;
+        data[id]={
+          section:sec,
+          status:"pending",
+          owner:owners[i%owners.length],
+          priority:i===1,
+          coord:i===2,
+          checked:false,
+          description:`${sec} condition item ${i}`,
+          dueDate:"",
+          thirdParty:i===2
+        };
+      }
+    });
+  }
+  localStorage.setItem(storageKey,JSON.stringify(data));
+  renderFilteredList(type);
+}
+
+function renderFilteredList(type){
+  // Update status button active state after rendering filters
+  if(type === "conditions" || type === "tasks") {
+    const data = type === "tasks" ? taskData : condData;
+    const status = (data.filters && data.filters.status) || null;
+    const pendingBtn = document.getElementById(`${type}PendingBtn`);
+    const completedBtn = document.getElementById(`${type}CompletedBtn`);
+    if(pendingBtn && completedBtn) {
+      pendingBtn.classList.remove('active');
+      completedBtn.classList.remove('active');
+      if(status === 'pending') pendingBtn.classList.add('active');
+      else if(status === 'completed') completedBtn.classList.add('active');
+    }
+  }
+  const data=type==="tasks"?taskData:condData;
+  const filters=data.filters;
+  const container=document.getElementById(type==="tasks"?"taskChecklist":"condChecklist");
+  
+  // Pagination logic
+  const pageSize = 10;
+  let page = window[type+"Page"] || 1;
+  function setPage(p){ window[type+"Page"] = p; renderFilteredList(type); }
+  let filteredKeys = Object.keys(data).filter(k=>{
+    if(k==="filters")return false;
+    const t=data[k];
+    if(type==="tasks"){
+      if(data.filters.owner && t.owner!==data.filters.owner)return false;
+      if(data.filters.milestone && t.milestone!==data.filters.milestone)return false;
+      if(data.filters.status && t.status!==data.filters.status)return false;
+      const hidden=t.checked&&data.filters.status!=="completed";
+      if(hidden)return false;
+    }else{
+      // Full filter logic for conditions
+      if(data.filters.section && t.section!==data.filters.section)return false;
+      if(data.filters.status && t.status!==data.filters.status)return false;
+      if(data.filters.owner && t.owner!==data.filters.owner)return false;
+      if(data.filters.priority && !t.priority)return false;
+      if(data.filters.coord && !t.coord)return false;
+      if(data.filters.thirdParty!==null && t.thirdParty !== (data.filters.thirdParty==='true'))return false;
+      const hidden=t.checked&&data.filters.status!=="completed";
+      if(hidden)return false;
+    }
+    return true;
+  });
+  const totalPages = Math.max(1,Math.ceil(filteredKeys.length/pageSize));
+  page = Math.max(1,Math.min(page,totalPages));
+  const pagedKeys = filteredKeys.slice((page-1)*pageSize,page*pageSize);
+  if(type === "conditions") {
+    container.innerHTML=`
+      <div class="conditions-table-container">
+        <table class="conditions-table">
+          <thead>
+            <tr>
+              <th></th>
+              <th></th>
+              <th></th>
+              <th>Owner</th>
+              <th>Condition</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="conditionsTableBody"></tbody>
+        </table>
+        <div class="table-footer" id="conditionsTableFooter"></div>
+      </div>
+    `;
+    const tbody = document.getElementById("conditionsTableBody");
+    let hasItems = false;
+    pagedKeys.forEach(k=>{
+      const t=data[k];
+      hasItems = true;
+      const row = document.createElement("tr");
+      row.setAttribute('data-condition-id', k);
+      row.onclick = (e) => {
+        if(e.target.type !== 'checkbox') {
+          selectConditionRow(k);
+        }
+      };
+      row.innerHTML=`
+        <td onclick="event.stopPropagation()">
+          <input type="checkbox" ${t.checked?"checked":""} onchange="toggleTask('${type}','${k}')">
+        </td>
+        <td onclick="event.stopPropagation()">
+          <i class="bi bi-pencil-square edit-btn" onclick="editCondition('${k}')" title="Edit"></i>
+        </td>
+        <td onclick="event.stopPropagation()">
+          <i class="bi bi-star${t.priority==='Yes'?'-fill':''} edit-btn" onclick="togglePriority('${type}','${k}',this)" title="Priority"></i>
+        </td>
+        <td>${t.owner}</td>
+        <td>${t.description || k.replace('_',' ')}</td>
+        <td><span class="badge ${t.status==='completed'?'bg-success':'bg-warning'}">${t.status}</span></td>
+      `;
+      tbody.appendChild(row);
+    });
+    if(!hasItems) {
+      tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">No conditions match the current filters</td></tr>';
+    }
+    // Pagination controls
+    const footer = document.getElementById("conditionsTableFooter");
+    if(totalPages>1){
+      let controls = `<nav><ul class='pagination justify-content-center mb-0'>`;
+      for(let i=1;i<=totalPages;i++){
+        controls += `<li class='page-item${i===page?' active':''}'><a class='page-link' href='#' onclick='setPage(${i});return false;'>${i}</a></li>`;
+      }
+      controls += `</ul></nav>`;
+      footer.innerHTML = controls;
+    }else{footer.innerHTML='';}
+  } else {
+    // Render tasks as table (no Status, Milestone, Due columns)
+    container.innerHTML=`
+      <div class="conditions-table-container">
+        <table class="conditions-table">
+          <thead>
+            <tr>
+              <th></th>
+              <th></th>
+              <th></th>
+              <th>Owner</th>
+              <th>Task</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="tasksTableBody"></tbody>
+        </table>
+        <div class="table-footer" id="tasksTableFooter"></div>
+      </div>
+    `;
+    const tbody = document.getElementById("tasksTableBody");
+    let hasItems = false;
+    pagedKeys.forEach(k=>{
+      const t=data[k];
+      hasItems = true;
+      const row = document.createElement("tr");
+      row.setAttribute('data-task-id', k);
+      row.onclick = (e) => {
+        if(e.target.type !== 'checkbox') {
+          /* selectTaskRow(k); */
+        }
+      };
+      row.innerHTML=`
+        <td onclick="event.stopPropagation()">
+          <input type="checkbox" ${t.checked?"checked":""} onchange="toggleTask('${type}','${k}')">
+        </td>
+        <td onclick="event.stopPropagation()">
+          <i class="bi bi-pencil-square edit-btn" title="Edit"></i>
+        </td>
+        <td onclick="event.stopPropagation()">
+          <i class="bi bi-star${t.priority==='Yes'?'-fill':''} edit-btn" onclick="togglePriority('${type}','${k}',this)" title="Priority"></i>
+        </td>
+        <td>${t.owner}</td>
+        <td>${t.description || k.replace('_',' ')}</td>
+        <td><span class="badge ${t.status==='completed'?'bg-success':'bg-warning'}">${t.status}</span></td>
+      `;
+      tbody.appendChild(row);
+    });
+    if(!hasItems) {
+      tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No tasks match the current filters</td></tr>';
+    }
+    // Pagination controls
+    const footer = document.getElementById("tasksTableFooter");
+    if(totalPages>1){
+      let controls = `<nav><ul class='pagination justify-content-center mb-0'>`;
+      for(let i=1;i<=totalPages;i++){
+        controls += `<li class='page-item${i===page?' active':''}'><a class='page-link' href='#' onclick='setPage(${i});return false;'>${i}</a></li>`;
+      }
+      controls += `</ul></nav>`;
+      footer.innerHTML = controls;
+    }else{footer.innerHTML='';}
+  }
+}
+
+function toggleTask(type,id){
+  const key=`loanCentral_${customerName}_${type}`;
+  const data=type==="tasks"?taskData:condData;
+  data[id].checked=!data[id].checked;
+  data[id].status=data[id].checked?"completed":"pending";
+  localStorage.setItem(key,JSON.stringify(data));
+  renderFilteredList(type);
+}
+
+function setFilterDropdown(type,field,select){
+  const data=type==="tasks"?taskData:condData;
+  const key=`loanCentral_${customerName}_${type}`;
+  data.filters[field]=select.value||null;
+  localStorage.setItem(key,JSON.stringify(data));
+  renderFilteredList(type);
+}
+
+function setFilter(type,field,value,btn){
+  const data=type==="tasks"?taskData:condData;
+  const key=`loanCentral_${customerName}_${type}`;
+  if(field==="status"){
+    data.filters.status=value;
+    localStorage.setItem(key,JSON.stringify(data));
+    renderFilteredList(type);
+    // Button active state handled by toggleStatusFilter
+  }else{
+    data.filters[field]=data.filters[field]===value?null:value;
+    localStorage.setItem(key,JSON.stringify(data));
+    btn.parentElement.querySelectorAll("button").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    renderFilteredList(type);
+  }
+}
+// Allow toggling both status buttons off to show all conditions
+function toggleStatusFilter(type, status, btn) {
+  const data = type === "tasks" ? taskData : condData;
+  const key = `loanCentral_${customerName}_${type}`;
+  if (!data.filters.status) {
+    // If no status, select this one
+    data.filters.status = status;
+    btn.classList.add("active");
+  } else if (data.filters.status === status) {
+    // If already selected, unselect
+    data.filters.status = null;
+    btn.classList.remove("active");
+  } else {
+    // Switch to the other status
+    data.filters.status = status;
+    document.getElementById(`${type}PendingBtn`).classList.remove("active");
+    document.getElementById(`${type}CompletedBtn`).classList.remove("active");
+    btn.classList.add("active");
+  }
+  localStorage.setItem(key, JSON.stringify(data));
+  renderFilteredList(type);
+}
+
+function togglePriority(type, id, icon) {
+  const data = type === "tasks" ? taskData : condData;
+  const key = `loanCentral_${customerName}_${type}`;
+  const current = data[id].priority === 'Yes';
+  data[id].priority = current ? 'No' : 'Yes';
+  if (data[id].priority === 'Yes') {
+    icon.classList.remove('bi-star');
+    icon.classList.add('bi-star-fill');
+    icon.style.color = '#28a745';
+  } else {
+    icon.classList.remove('bi-star-fill');
+    icon.classList.add('bi-star');
+    icon.style.color = '';
+  }
+  localStorage.setItem(key, JSON.stringify(data));
+}
+
+function toggleSwitch(type,field,el){
+  const data=type==="tasks"?taskData:condData;
+  const key=`loanCentral_${customerName}_${type}`;
+  data.filters[field]=el.checked;
+  localStorage.setItem(key,JSON.stringify(data));
+  renderFilteredList(type);
+}
+
+/* -------------------- CONDITION EDITING -------------------- */
+let currentEditingCondition = null;
+let selectedConditionId = null;
+
+function selectConditionRow(conditionId) {
+  // Remove previous selection
+  document.querySelectorAll('.conditions-table tbody tr').forEach(row => {
+    row.classList.remove('selected');
+  });
+  
+  // Add selection to clicked row
+  const row = document.querySelector(`tr[data-condition-id="${conditionId}"]`);
+  if (row) {
+    row.classList.add('selected');
+    selectedConditionId = conditionId;
+  }
+}
+
+function toggleConditionEdit(show) {
+  const overlay = document.getElementById("conditionEditOverlay");
+  const panel = document.getElementById("conditionEditPanel");
+  if (show) {
+    overlay.classList.add("show");
+    panel.classList.add("show");
+  } else {
+    overlay.classList.remove("show");
+    panel.classList.remove("show");
+    setTimeout(() => overlay.style.display = "none", 300);
+  }
+}
+
+function editCondition(conditionId) {
+  currentEditingCondition = conditionId;
+  const condition = condData[conditionId];
+  
+  // Populate form fields
+  document.getElementById('editConditionDesc').value = condition.description || '';
+  document.getElementById('editConditionSection').value = condition.section || 'Credit';
+  document.getElementById('editConditionOwner').value = condition.owner || 'BO';
+  document.getElementById('editConditionStatus').value = condition.status || 'pending';
+  document.getElementById('editConditionDueDate').value = condition.dueDate || '';
+  // Set Priority buttons
+  if(condition.priority){
+    document.getElementById('priorityYes').classList.add('active');
+    document.getElementById('priorityNo').classList.remove('active');
+  }else{
+    document.getElementById('priorityYes').classList.remove('active');
+    document.getElementById('priorityNo').classList.add('active');
+  }
+  // Set Coordinating buttons
+    // Set Priority buttons
+  if(condition.coord){
+    document.getElementById('coordYes').classList.add('active');
+    document.getElementById('coordNo').classList.remove('active');
+  }else{
+    document.getElementById('coordYes').classList.remove('active');
+    document.getElementById('coordNo').classList.add('active');
+  }
+  // Set 3rd Party Orders buttons
+  if(condition.thirdParty){
+    document.getElementById('thirdPartyYes').classList.add('active');
+    document.getElementById('thirdPartyNo').classList.remove('active');
+  }else{
+    document.getElementById('thirdPartyYes').classList.remove('active');
+    document.getElementById('thirdPartyNo').classList.add('active');
+  }
+  // Add click handlers
+  document.getElementById('priorityYes').onclick = function(){ setPriorityEdit(true); };
+  document.getElementById('priorityNo').onclick = function(){ setPriorityEdit(false); };
+  document.getElementById('coordYes').onclick = function(){ setCoordEdit(true); };
+  document.getElementById('coordNo').onclick = function(){ setCoordEdit(false); };
+  document.getElementById('thirdPartyYes').onclick = function(){ setThirdPartyEdit(true); };
+  document.getElementById('thirdPartyNo').onclick = function(){ setThirdPartyEdit(false); };
+  
+  toggleConditionEdit(true);
+}
+    // Set 3rd Party Orders buttons
+    if(condition.thirdParty){
+      document.getElementById('thirdPartyYes').classList.add('active');
+      document.getElementById('thirdPartyNo').classList.remove('active');
+    }else{
+      document.getElementById('thirdPartyYes').classList.remove('active');
+      document.getElementById('thirdPartyNo').classList.add('active');
+    }
+    // Add click handlers
+
+function saveConditionEdit() {
+  if (!currentEditingCondition) return;
+  
+  const condition = condData[currentEditingCondition];
+  condition.description = document.getElementById('editConditionDesc').value;
+  condition.section = document.getElementById('editConditionSection').value;
+  condition.owner = document.getElementById('editConditionOwner').value;
+  condition.status = document.getElementById('editConditionStatus').value;
+  condition.dueDate = document.getElementById('editConditionDueDate').value;
+  condition.priority = document.getElementById('priorityYes').classList.contains('active');
+  condition.coord = document.getElementById('coordYes').classList.contains('active');
+  condition.thirdParty = document.getElementById('thirdPartyYes').classList.contains('active');
+function setPriorityEdit(val){
+  document.getElementById('priorityYes').classList.toggle('active',val);
+  document.getElementById('priorityNo').classList.toggle('active',!val);
+}
+function setCoordEdit(val){
+  document.getElementById('coordYes').classList.toggle('active',val);
+  document.getElementById('coordNo').classList.toggle('active',!val);
+}
+function setThirdPartyEdit(val){
+  document.getElementById('thirdPartyYes').classList.toggle('active',val);
+  document.getElementById('thirdPartyNo').classList.toggle('active',!val);
+}
+function setPriorityEdit(val){
+  document.getElementById('priorityYes').classList.toggle('active',val);
+  document.getElementById('priorityNo').classList.toggle('active',!val);
+}
+function setCoordEdit(val){
+  document.getElementById('coordYes').classList.toggle('active',val);
+  document.getElementById('coordNo').classList.toggle('active',!val);
+}
+  condition.checked = condition.status === 'completed';
+  
+  const key = `loanCentral_${customerName}_conditions`;
+  localStorage.setItem(key, JSON.stringify(condData));
+  
+  renderFilteredList('conditions');
+  cancelConditionEdit();
+}
+
+function cancelConditionEdit() {
+  currentEditingCondition = null;
+  toggleConditionEdit(false);
+}
+
+/* -------------------- FINANCIALS -------------------- */
+function initFinancials(){
+  const key=`loanCentral_${customerName}_financials`;
+  finData=JSON.parse(localStorage.getItem(key))||{
+    loan:{amount:"",rate:"",term:""},
+    income:{gross:"",debts:"",dti:""},
+    assets:{assets:"",liabilities:"",cash:""}
+  };
+  
+  // Helper function to format display values
+  function getDisplayValue(value, type) {
+    if (!value || value === "") return "";
+    const num = parseFloat(value);
+    if (isNaN(num)) return value;
+    
+    switch(type) {
+      case 'currency':
+        return formatCurrency(num);
+      case 'percent':
+        return num.toFixed(2) + '%';
+      case 'integer':
+        return Math.round(num).toLocaleString();
+      default:
+        return value;
+    }
+  }
+  
+  const f=document.getElementById("finContainer");
+  f.innerHTML=`
+  <div class="fin-box"><h6>Loan</h6>
+    <input type="text" id="loan_amount" placeholder="Loan Amount" value="${getDisplayValue(finData.loan.amount, 'currency')}" onblur="saveFin(this)" onfocus="removeCurrencyFormatting(this)" data-bs-toggle="tooltip" title="Loan Amount">
+    <input type="text" id="loan_rate" placeholder="Interest Rate %" value="${getDisplayValue(finData.loan.rate, 'percent')}" onblur="saveFin(this)" onfocus="removePercentFormatting(this)" data-bs-toggle="tooltip" title="Interest Rate">
+    <input type="text" id="loan_term" placeholder="Term (months)" value="${getDisplayValue(finData.loan.term, 'integer')}" onblur="saveFin(this)" onfocus="removeCommaFormatting(this)" data-bs-toggle="tooltip" title="Term">
+  </div>
+  <div class="fin-box"><h6>Income / Expenses</h6>
+    <input type="text" id="income_gross" placeholder="Gross Income" value="${getDisplayValue(finData.income.gross, 'currency')}" onblur="saveFin(this)" onfocus="removeCurrencyFormatting(this)" data-bs-toggle="tooltip" title="Gross Income">
+    <input type="text" id="income_debts" placeholder="Monthly Debts" value="${getDisplayValue(finData.income.debts, 'currency')}" onblur="saveFin(this)" onfocus="removeCurrencyFormatting(this)" data-bs-toggle="tooltip" title="Monthly Debts">
+    <input type="text" id="income_dti" placeholder="DTI %" value="${getDisplayValue(finData.income.dti, 'percent')}" onblur="saveFin(this)" onfocus="removePercentFormatting(this)" data-bs-toggle="tooltip" title="DTI">
+  </div>
+  <div class="fin-box"><h6>Assets / Liabilities</h6>
+    <input type="text" id="assets_assets" placeholder="Total Assets" value="${getDisplayValue(finData.assets.assets, 'currency')}" onblur="saveFin(this)" onfocus="removeCurrencyFormatting(this)" data-bs-toggle="tooltip" title="Total Assets">
+    <input type="text" id="assets_liabilities" placeholder="Total Liabilities" value="${getDisplayValue(finData.assets.liabilities, 'currency')}" onblur="saveFin(this)" onfocus="removeCurrencyFormatting(this)" data-bs-toggle="tooltip" title="Total Liabilities">
+    <input type="text" id="assets_cash" placeholder="Cash to Close" value="${getDisplayValue(finData.assets.cash, 'currency')}" onblur="saveFin(this)" onfocus="removeCurrencyFormatting(this)" data-bs-toggle="tooltip" title="Cash to Close">
+  </div>`;
+  
+  // Initialize tooltips after creating the elements
+  setTimeout(() => {
+    enableTooltips();
+  }, 100);
+}
+function saveFin(el){
+  const id=el.id.split("_");
+  let value = el.value;
+  
+  // Remove any existing formatting (commas, %) to get raw number
+  let cleanValue = value.replace(/[,$%]/g, '');
+  
+  // Format the value based on field type
+  if (cleanValue && !isNaN(cleanValue)) {
+    const numValue = parseFloat(cleanValue);
+    
+    // Format percentage fields (rate and dti)
+    if (id[1] === 'rate' || id[1] === 'dti') {
+      el.value = numValue.toFixed(2) + '%';
+      value = numValue.toFixed(2); // Store raw number without %
+    }
+    // Format currency fields (amounts and monetary values)
+    else if (id[1] === 'amount' || id[1] === 'gross' || id[1] === 'debts' || 
+             id[1] === 'assets' || id[1] === 'liabilities' || id[1] === 'cash') {
+      el.value = formatCurrency(numValue);
+      value = numValue.toFixed(2); // Store raw number without formatting
+    }
+    // Format whole number fields (term in months)
+    else if (id[1] === 'term') {
+      const roundedValue = Math.round(numValue);
+      el.value = roundedValue.toLocaleString();
+      value = roundedValue.toString();
+    }
+  }
+  
+  finData[id[0]][id[1]] = value;
+  localStorage.setItem(`loanCentral_${customerName}_financials`, JSON.stringify(finData));
+}
+
+function formatCurrency(num) {
+  return num.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+
+function removeCurrencyFormatting(el) {
+  let value = el.value.replace(/[,$]/g, '');
+  if (value && !isNaN(value)) {
+    el.value = parseFloat(value).toString();
+  }
+}
+
+function removePercentFormatting(el) {
+  let value = el.value.replace(/%/g, '');
+  if (value && !isNaN(value)) {
+    el.value = parseFloat(value).toString();
+  }
+}
+
+function removeCommaFormatting(el) {
+  let value = el.value.replace(/,/g, '');
+  if (value && !isNaN(value)) {
+    el.value = parseInt(value).toString();
+  }
+}
+
+/* -------------------- NOTES -------------------- */
+function initNotes(){
+  const key=`loanCentral_${customerName}_notes`;
+  notesData=JSON.parse(localStorage.getItem(key))||[];
+  renderNotes();
+}
+function renderNotes(){
+  const list=document.getElementById("noteList");
+  list.innerHTML=`
+    <button class="btn btn-sm btn-success mb-2 w-100" onclick="addNote()">+ New Note</button>
+    ${notesData.map((n,i)=>`<div class="note-item" onclick="selectNote(${i})">${n.title||"Untitled"}</div>`).join("")}`;
+}
+function addNote(){
+  notesData.push({title:"New Note",content:""});
+  saveNotes();renderNotes();
+}
+function selectNote(i){
+  document.querySelectorAll(".note-item").forEach((el,idx)=>el.classList.toggle("active",idx===i));
+  const note=notesData[i];const area=document.getElementById("noteView");
+  area.value=note.content;
+  area.onblur=()=>{notesData[i].content=area.value;saveNotes();};
+}
+function saveNotes(){localStorage.setItem(`loanCentral_${customerName}_notes`,JSON.stringify(notesData));}
+
+/* -------------------- SAVE & EXIT -------------------- */
+function saveAndExit(){
+  localStorage.setItem(`loanCentral_${customerName}_tasks`,JSON.stringify(taskData));
+  localStorage.setItem(`loanCentral_${customerName}_conditions`,JSON.stringify(condData));
+  localStorage.setItem(`loanCentral_${customerName}_financials`,JSON.stringify(finData));
+  localStorage.setItem(`loanCentral_${customerName}_notes`,JSON.stringify(notesData));
+  window.location.href="index.html";
+}
+
+/* -------------------- AIUS PANEL -------------------- */
+function toggleAIUS(show){
+  const overlay=document.getElementById("aiusOverlay");
+  const panel=document.getElementById("aiusPanel");
+  if(show){overlay.classList.add("show");panel.classList.add("active");}
+  else{overlay.classList.remove("show");panel.classList.remove("active");setTimeout(()=>overlay.style.display="none",300);}
+}
+
+/* -------------------- CHAT -------------------- */
+function sendMessage(){
+  const input=document.getElementById("aiusInput");
+  const chat=document.getElementById("aiusChat");
+  const msg=input.value.trim();
+  if(!msg)return;
+  chat.insertAdjacentHTML("beforeend",`<div class="chat-message user"><div class="chat-bubble">${msg}</div></div>`);
+  input.value="";
+  scrollChat();
+  setTimeout(()=>{
+    chat.insertAdjacentHTML("beforeend",`<div class="chat-message ai"><div class="chat-bubble">Got it. I'll check that for you.</div></div>`);
+    scrollChat();
+  },600);
+}
+function handleKeyPress(e){if(e.key==="Enter")sendMessage();}
+function scrollChat(){const chat=document.getElementById("aiusChat");chat.scrollTop=chat.scrollHeight;}
+
+/* -------------------- NAVIGATION -------------------- */
+function goHome() { window.location.href = "index.html"; }
+
+/* -------------------- TOOLTIP -------------------- */
+function enableTooltips(){
+  const t=[].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+  t.map(el=>new bootstrap.Tooltip(el));
+}
+</script>
+
+<!-- Bottom Navigation -->
+<div class="bottom-nav">
+  <a href="#" class="nav-item active" onclick="showTab(event,'summary')">
+    <i class="bi bi-layers"></i>
+    <span><strong>Summary</strong></span>
+  </a>
+  <a href="#" class="nav-item" onclick="showTab(event,'conditions')">
+    <i class="bi bi-list-check"></i>
+    <span><strong>Conditions</strong></span>
+  </a>
+  <a href="#" class="nav-item" onclick="showTab(event,'tasks')">
+    <i class="bi bi-clipboard-check"></i>
+    <span><strong>Tasks</strong></span>
+  </a>
+  <a href="#" class="nav-item" onclick="showTab(event,'financials')">
+    <i class="bi bi-cash-stack"></i>
+    <span><strong>Financials</strong></span>
+  </a>
+  <a href="#" class="nav-item" onclick="showTab(event,'notes')">
+    <i class="bi bi-journal-text"></i>
+    <span><strong>Notes</strong></span>
+  </a>
+</div>
+
+</body>
+</html>
